@@ -4,6 +4,7 @@ import asyncio
 import settings
 import discord
 from discord.ext import commands
+import game_requests
 
 logger = settings.logging.getLogger("bot")
 
