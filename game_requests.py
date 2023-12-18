@@ -23,20 +23,29 @@ def is_today(game):
     game_date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ")
     return game_date.day == datetime.now().day
 
-def is_fanduel(bookmakers):
-    pass
-
 
 def filter_data(data):
     filter(is_today, data)
-    results =[]
+    results = []
     for game in data:
-        print(game['bookmakers'])
         date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ")
         home_team = game['home_team']
         away_team = game['away_team']
-        # results.append(Game())
-    return data
+        for bookmaker in game['bookmakers']:
+            if bookmaker['key'] == 'fanduel':
+                odds = bookmaker['markets'][0]['outcomes']
+                if odds[0]['name'] == home_team:
+                    home_team_odds = odds[0]['price']
+                    away_team_odds = odds[1]['price']
+                else:
+                    home_team_odds = odds[1]['price']
+                    away_team_odds = odds[0]['price']
+                results.append(Game(date, home_team, away_team, home_team_odds, away_team_odds))
+                break
+    return results
 
 
-print(filter_data(get_data()))
+list = filter_data(get_data())
+for game in list:
+    print(game)
+    print()
