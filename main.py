@@ -1,4 +1,5 @@
-import random
+import datetime
+import asyncio
 
 import settings
 import discord
@@ -15,37 +16,18 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
+        await send_daily_message()
 
-    @bot.command(
-        aliases=['p'],
-        help="This is help",
-        description="This is description",
-        brief="This is brief",
-        enabled=True
-    )
-    async def ping(ctx):
-        """ Answers with pong """
-        await ctx.send("pong")
+    async def send_daily_message():
+        now = datetime.datetime.now()
+        then = now + datetime.timedelta(days=1)
+        then.replace(hour=2, minute=0)
+        # then = now.replace(hour=21, minute=5)
+        wait_time = (then - now).total_seconds()
+        await asyncio.sleep(wait_time)
 
-    @bot.command()
-    async def say(ctx, what="WHAT?"):
-        await ctx.send(what)
-
-    @bot.command()
-    async def say2(ctx, *what):
-        await ctx.send(" ".join(what))
-
-    @bot.command()
-    async def choices(ctx, *options):
-        await ctx.send(random.choice(options))
-
-    @bot.command()
-    async def add(ctx, one: int, two: int):
-        await ctx.send(one + two)
-
-    @bot.command()
-    async def say3(ctx, what="WHAT?", why="WHY?"):
-        await ctx.send(what + why)
+        channel = bot.get_channel(1181446708232716321)
+        await channel.send("GOOD MORNING!")
 
     bot.run(settings.TOKEN, root_logger=True)
 
