@@ -26,12 +26,14 @@ def run():
 
     @bot.event
     async def on_message(message):
+        if "@" not in message.content:
+            return
         if message.author == bot.user:
             away_team = message.content[0: message.content.find("(") - 1]
             home_team = message.content[message.content.find("@"):]
             home_team = home_team[2:home_team.find("(") - 1]
-            away_emoji = ""
-            home_emoji = ""
+            away_emoji = logo_table[away_team]
+            home_emoji = logo_table[home_team]
             await message.add_reaction(away_emoji)
             await message.add_reaction(home_emoji)
 
@@ -39,7 +41,7 @@ def run():
         now = datetime.datetime.now()
         # then = now + datetime.timedelta(days=1)
         # then.replace(hour=2, minute=0)
-        then = now.replace(hour=12, minute=24)
+        then = now.replace(hour=13, minute=16)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
