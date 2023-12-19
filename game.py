@@ -7,5 +7,4 @@ class Game:
         self.away_team_odds = away_team_odds
 
     def __str__(self):
-        return (f"Date: {self.date}\n"
-                f"{self.away_team} ({self.away_team_odds}) @ {self.home_team} ({self.home_team_odds})")
+        return f"{self.away_team} ({self.away_team_odds}) @ {self.home_team} ({self.home_team_odds})"
