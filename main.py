@@ -27,7 +27,7 @@ def run():
         now = datetime.datetime.now()
         # then = now + datetime.timedelta(days=1)
         # then.replace(hour=2, minute=0)
-        then = now.replace(hour=8, minute=16)
+        then = now.replace(hour=8, minute=19)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
