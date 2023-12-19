@@ -5,6 +5,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
+from create_view import create_message_view
 
 logger = settings.logging.getLogger("bot")
 
@@ -24,16 +25,16 @@ def run():
 
     async def send_daily_message():
         now = datetime.datetime.now()
-        then = now + datetime.timedelta(days=1)
-        then.replace(hour=2, minute=0)
-        # then = now.replace(hour=13, minute=37)
+        # then = now + datetime.timedelta(days=1)
+        # then.replace(hour=2, minute=0)
+        then = now.replace(hour=8, minute=16)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
         game_data = get_game_data()
         channel = bot.get_channel(1181446708232716321)
         for game in game_data:
-            await channel.send(game)
+            await channel.send(game, view=create_message_view(game))
 
     bot.run(settings.TOKEN, root_logger=True)
 

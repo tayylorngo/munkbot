@@ -45,7 +45,7 @@ def filter_data(data):
     return results
 
 
-list = filter_data(get_data())
-for game in list:
+game_list = filter_data(get_data())
+for game in game_list:
     print(game)
     print()
