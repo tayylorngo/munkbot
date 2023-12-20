@@ -37,3 +37,12 @@ def get_key(val):
         if val == value:
             return key
     return None
+
+
+def get_away_team(message):
+    return message.content[0: message.content.find("(") - 1]
+
+
+def get_home_team(message):
+    home_team = message.content[message.content.find("@"):]
+    return home_team[2:home_team.find("(") - 1]

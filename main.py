@@ -5,7 +5,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from nba_logos import logo_table, get_key
+from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")
 
@@ -28,11 +28,8 @@ def run():
         if "@" not in message.content or "@everyone" in message.content:
             return
         if message.author == bot.user:
-            away_team = message.content[0: message.content.find("(") - 1]
-            home_team = message.content[message.content.find("@"):]
-            home_team = home_team[2:home_team.find("(") - 1]
-            away_emoji = logo_table[away_team]
-            home_emoji = logo_table[home_team]
+            away_emoji = logo_table[get_away_team(message)]
+            home_emoji = logo_table[get_home_team(message)]
             await message.add_reaction(away_emoji)
             await message.add_reaction(home_emoji)
         else:
@@ -40,14 +37,22 @@ def run():
 
     @bot.event
     async def on_reaction_add(reaction, user):
-        print(reaction)
         if user == bot.user:
             return
+        team1_emoji = logo_table[get_away_team(reaction.message)]
+        team2_emoji = logo_table[get_home_team(reaction.message)]
+        if str(reaction) == team1_emoji:
+            for r in reaction.message.reactions:
+                if str(r) == team2_emoji:
+                    await r.remove(user)
+        else:
+            for r in reaction.message.reactions:
+                if str(r) == team1_emoji:
+                    await r.remove(user)
         print(user.name + " voted for " + get_key(str(reaction)))
 
     @bot.event
     async def on_reaction_remove(reaction, user):
-        print(reaction)
         if user == bot.user:
             return
         print(user.name + " un-voted for " + get_key(str(reaction)))
