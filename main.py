@@ -36,6 +36,12 @@ def run():
             return
 
     @bot.event
+    async def on_raw_reaction_remove(payload):
+        pass
+        #print("HELLO")
+        #print(payload.user_id)
+
+    @bot.event
     async def on_reaction_add(reaction, user):
         if user == bot.user:
             return
@@ -50,12 +56,6 @@ def run():
                 if str(r) == team1_emoji:
                     await r.remove(user)
         print(user.name + " voted for " + get_key(str(reaction)))
-
-    @bot.event
-    async def on_reaction_remove(reaction, user):
-        if user == bot.user:
-            return
-        print(user.name + " un-voted for " + get_key(str(reaction)))
 
     async def send_daily_message():
         now = datetime.datetime.now()
