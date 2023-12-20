@@ -21,7 +21,7 @@ logo_table = {
     "New York Knicks": "<:knicks:1186728268276174999>",
     "Oklahoma City Thunder": "<:thunder:1186732311631364136>",
     "Orlando Magic": "<:magic:1186732333630501044>",
-    "Philadelphia Sixers": "<:76ers:1186728245589184594>",
+    "Philadelphia 76ers": "<:76ers:1186728245589184594>",
     "Phoenix Suns": "<:suns:1186728954762113054>",
     "Portland Trail Blazers": "<:trailblazers:1186728958633459794>",
     "Sacramento Kings": "<:kings:1186728933396332595>",
@@ -30,3 +30,10 @@ logo_table = {
     "Utah Jazz": "<:jazz:1186728263440138381>",
     "Washington Wizards": "<:wizards:1186732218199052329>"
 }
+
+
+def get_key(val):
+    for key, value in logo_table.items():
+        if val == value:
+            return key
+    return None

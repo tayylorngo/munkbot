@@ -19,15 +19,12 @@ def get_data():
         return sports_response.json()
 
 
-def is_today(game):
-    game_date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ")
-    return game_date.day == datetime.now().day
-
-
 def filter_data(data):
-    filter(is_today, data)
     results = []
     for game in data:
+        game_date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ").astimezone()
+        if game_date.day != datetime.today().day and game_date.day != datetime.today().day + 1:
+            continue
         date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ")
         home_team = game['home_team']
         away_team = game['away_team']
@@ -48,4 +45,5 @@ def filter_data(data):
 game_list = filter_data(get_data())
 for game in game_list:
     print(game)
-    print()
+
+
