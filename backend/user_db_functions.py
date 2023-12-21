@@ -78,10 +78,10 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
     if len(user["games_voted_on"]) == 0:
         new_betting_odds = 0
     elif game["home_team"] == voted_team:
-        new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * len(user["games_voted_on"])
+        new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * (len(user["games_voted_on"]) + 1)
                              - game["home_team_odds"]) / (len(user["games_voted_on"])))
     else:
-        new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * len(user["games_voted_on"])
+        new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * (len(user["games_voted_on"]) + 1)
                              - game["away_team_odds"]) / (len(user["games_voted_on"])))
     new_betting_stats = user['betting_stats']
     new_betting_stats.update(
