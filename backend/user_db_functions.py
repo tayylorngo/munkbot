@@ -44,19 +44,19 @@ def update_user_on_vote(db, user, game, reaction, voted_team):
             voted_team: count
         }
     )
-    if game.home_team == voted_team:
+    if game["home_team"] == voted_team:
         new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * len(user["games_voted_on"])
-                            + game.home_team_odds) / (len(user["games_voted_on"]) + 1))
+                            + game["home_team_odds"]) / (len(user["games_voted_on"]) + 1))
     else:
         new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * len(user["games_voted_on"])
-                             + game.away_team_odds) / (len(user["games_voted_on"]) + 1))
+                             + game["away_team_odds"]) / (len(user["games_voted_on"]) + 1))
     new_betting_stats = user['betting_stats']
     new_betting_stats.update(
         {
             "average_betting_odds": new_betting_odds
         }
     )
-    user_filter = {'user_id': user.id}
+    user_filter = {'user_id': user["user_id"]}
     new_values = {"$set": {
         "games_voted_on": new_games_voted_on_list,
         "teams_voted_on": new_teams_voted_on,
