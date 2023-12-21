@@ -50,19 +50,9 @@ def update_user_on_vote(db, user, game, reaction, voted_team):
     else:
         new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * (len(user["games_voted_on"]) - 1)
                              + game["away_team_odds"]) / (len(user["games_voted_on"])))
-    new_betting_stats = user['betting_stats']
-    new_betting_stats.update(
-        {
-            "average_betting_odds": new_betting_odds
-        }
-    )
-    user_filter = {'user_id': user["user_id"]}
-    new_values = {"$set": {
-        "games_voted_on": new_games_voted_on_list,
-        "teams_voted_on": new_teams_voted_on,
-        "betting_stats": new_betting_stats
-    }}
-    db.users.update_one(user_filter, new_values)
+    update_user_betting_stats(db, user, new_betting_odds
+                              , user['betting_stats'], new_games_voted_on_list,
+                              new_teams_voted_on)
 
 
 def update_user_on_vote_remove(db, user, game, reaction, voted_team):
@@ -83,7 +73,12 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
     else:
         new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * (len(user["games_voted_on"]) + 1)
                              - game["away_team_odds"]) / (len(user["games_voted_on"])))
-    new_betting_stats = user['betting_stats']
+
+    update_user_betting_stats(db, user, new_betting_odds
+                              , user['betting_stats'], new_games_voted_on_list, new_teams_voted_on)
+
+
+def update_user_betting_stats(db, user, new_betting_odds, new_betting_stats, new_games_voted_on_list, new_teams_voted_on):
     new_betting_stats.update(
         {
             "average_betting_odds": new_betting_odds
@@ -96,3 +91,4 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
         "betting_stats": new_betting_stats
     }}
     db.users.update_one(user_filter, new_values)
+
