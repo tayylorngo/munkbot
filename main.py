@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 import game_requests
 from backend.game_db_functions import get_today_games, add_new_game
-from backend.user_db_functions import get_user, add_new_user
+from backend.user_db_functions import get_user, add_new_user, update_user_on_vote
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")
@@ -78,23 +78,7 @@ def run():
                 if voting_user.count:
                     add_new_user(user_db, game, user, reaction)
                 else:
-                    new_games_voted_on_list = voting_user["games_voted_on"]
-                    new_games_voted_on_list.append(game["_id"])
-                    new_teams_voted_on = voting_user["teams_voted_on"]
-                    count = 1
-                    if get_key(str(reaction)) in new_teams_voted_on:
-                        count = new_teams_voted_on['teams_voted_on'][get_key(reaction)] + 1
-                    new_teams_voted_on.update(
-                        {
-                            get_key(str(reaction)): count
-                        }
-                    )
-                    user_filter = {'user_id': user.id}
-                    new_values = {"$set": {
-                        "games_voted_on": new_games_voted_on_list,
-                        "teams_voted_on": new_teams_voted_on
-                    }}
-                    user_db.users.update_one(user_filter, new_values)
+                    update_user_on_vote(user_db, voting_user, game, reaction)
 
         if str(reaction) == team1_emoji:
             for r in reaction.message.reactions:
