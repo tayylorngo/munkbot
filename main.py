@@ -8,7 +8,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from db_functions import add_new_game
+from db_functions import add_new_game, get_today_games
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")

@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def add_new_game(db, game):
     db.games.insert_one(
         {
@@ -13,3 +16,9 @@ def add_new_game(db, game):
             "home_team_voters": []
         }
     )
+
+
+def get_today_games(db):
+    key = {"date": datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)}
+    for game in db.games.find(key):
+        print(game)
