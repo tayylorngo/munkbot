@@ -13,7 +13,8 @@ def add_new_game(db, game):
             "losing_team": "",
             "majority_team": "",
             "away_team_voters": [],
-            "home_team_voters": []
+            "home_team_voters": [],
+            "message_id": ""
         }
     )
 
@@ -24,3 +25,13 @@ def get_today_games(db):
     # for game in today_games:
     #     print(game)
     return today_games
+
+
+def game_add_message_id(db, game, message_id):
+    game_filter = {"_id": game["_id"]}
+    new_values = {"$set": {
+        "message_id": message_id
+    }}
+    db.games.update_one(game_filter, new_values)
+
+

@@ -8,7 +8,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from backend.game_db_functions import get_today_games, add_new_game
+from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
@@ -53,9 +53,9 @@ def run():
 
     @bot.event
     async def on_raw_reaction_remove(payload):
-        user = get_user(user_db, payload.user_id)
         channel = bot.get_channel(1181446708232716321)
         reaction = await channel.fetch_message(payload.message_id)
+        user = get_user(user_db, payload.user_id)
         voted_team = get_key(str(payload.emoji))
         for game in get_today_games(game_db):
             if game["home_team"] == get_home_team(reaction) and game["away_team"] == get_away_team(reaction):
@@ -64,9 +64,14 @@ def run():
 
     @bot.event
     async def on_reaction_add(reaction, user):
+        today_games = get_today_games(game_db)
         if user == bot.user:
-            # should update the mongodb game data to add the message_id
+            for game in today_games:
+                if (game["home_team"] == get_home_team(reaction.message)
+                        and game["away_team"] == get_away_team(reaction.message)):
+                    game_add_message_id(game_db, game, reaction.message.id)
             return
+
         voted_team = get_key(str(reaction))
         team1_emoji = logo_table[get_away_team(reaction.message)]
         team2_emoji = logo_table[get_home_team(reaction.message)]
@@ -77,7 +82,7 @@ def run():
                     await r.remove(user)
             return
 
-        for game in get_today_games(game_db):
+        for game in today_games:
             if (game["home_team"] == get_home_team(reaction.message)
                     and game["away_team"] == get_away_team(reaction.message)):
                 voting_user = get_user(user_db, user.id)
