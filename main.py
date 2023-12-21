@@ -8,7 +8,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from db_functions import add_new_game, get_today_games
+from db_functions import add_new_game, get_today_games, get_user, add_new_user
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")
@@ -62,16 +62,22 @@ def run():
             return
         team1_emoji = logo_table[get_away_team(reaction.message)]
         team2_emoji = logo_table[get_home_team(reaction.message)]
-        # IF REACTION WAS AFTER DAY OF CREATED MESSAGE
+        # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
         if reaction.message.created_at.date != datetime.datetime.today().date():
+            print("ILLEGAL REACTION")
             for r in reaction.message.reactions:
                 if str(r) == str(reaction):
                     r.remove(user)
             return
 
         for game in get_today_games(game_db):
-            # FIND GAME
-            pass
+            if game.home_team == get_home_team(reaction.message) and game.away_team == get_away_team(reaction.message):
+                # GET USER AND UPDATE THAT AND UPDATE GAME
+                if get_user(user_db, user.id).count <= 0:
+                    add_new_user(user_db, game, user, reaction)
+                else:
+                    return
+
         if str(reaction) == team1_emoji:
             for r in reaction.message.reactions:
                 if str(r) == team2_emoji:
