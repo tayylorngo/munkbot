@@ -21,6 +21,6 @@ def add_new_game(db, game):
 def get_today_games(db):
     key = {"date": datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)}
     today_games = db.games.find(key)
-    for game in today_games:
-        print(game)
+    # for game in today_games:
+    #     print(game)
     return today_games

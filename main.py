@@ -62,23 +62,24 @@ def run():
         if user == bot.user:
             # should update the mongodb game data to add the message_id
             return
+        voted_team = get_key(str(reaction))
         team1_emoji = logo_table[get_away_team(reaction.message)]
         team2_emoji = logo_table[get_home_team(reaction.message)]
         # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
-        if reaction.message.created_at.date != datetime.datetime.today().date():
-            print("ILLEGAL REACTION")
+        if reaction.message.created_at.date() != datetime.datetime.now().date():
             for r in reaction.message.reactions:
                 if str(r) == str(reaction):
-                    r.remove(user)
+                    await r.remove(user)
             return
 
         for game in get_today_games(game_db):
-            if game.home_team == get_home_team(reaction.message) and game.away_team == get_away_team(reaction.message):
+            if (game["home_team"] == get_home_team(reaction.message)
+                    and game["away_team"] == get_away_team(reaction.message)):
                 voting_user = get_user(user_db, user.id)
-                if voting_user.count:
-                    add_new_user(user_db, game, user, reaction)
+                if not voting_user:
+                    add_new_user(user_db, game, user, reaction, voted_team)
                 else:
-                    update_user_on_vote(user_db, voting_user, game, reaction)
+                    update_user_on_vote(user_db, voting_user, game, reaction, voted_team)
 
         if str(reaction) == team1_emoji:
             for r in reaction.message.reactions:
@@ -88,7 +89,7 @@ def run():
             for r in reaction.message.reactions:
                 if str(r) == team1_emoji:
                     await r.remove(user)
-        print(user.name + " voted for " + get_key(str(reaction)))
+        print(user.name + " voted for " + voted_team)
 
     async def send_daily_message():
         now = datetime.datetime.now()
