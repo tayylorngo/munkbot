@@ -9,11 +9,10 @@ import discord
 from discord.ext import commands
 import game_requests
 from backend.game_db_functions import get_today_games, add_new_game
-from backend.user_db_functions import get_user, add_new_user, update_user_on_vote
+from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")
-
 
 def run():
     intents = discord.Intents.default()
@@ -54,8 +53,15 @@ def run():
 
     @bot.event
     async def on_raw_reaction_remove(payload):
-        user = await bot.fetch_user(payload.user_id)
-        print(user.name + " un-voted for " + get_key(str(payload.emoji)))
+        user = get_user(user_db, payload.user_id)
+        channel = bot.get_channel(1181446708232716321)
+        reaction = await channel.fetch_message(payload.message_id)
+        voted_team = get_key(str(reaction))
+        for game in get_today_games(game_db):
+            if game["home_team"] == get_home_team(reaction) and game["away_team"] == get_away_team(reaction):
+                print("YO")
+                update_user_on_vote_remove(user_db, user, game, reaction, voted_team)
+        print(user["name"] + " un-voted for " + voted_team)
 
     @bot.event
     async def on_reaction_add(reaction, user):
