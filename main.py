@@ -56,12 +56,11 @@ def run():
         user = get_user(user_db, payload.user_id)
         channel = bot.get_channel(1181446708232716321)
         reaction = await channel.fetch_message(payload.message_id)
-        voted_team = get_key(str(reaction))
+        voted_team = get_key(str(payload.emoji))
         for game in get_today_games(game_db):
             if game["home_team"] == get_home_team(reaction) and game["away_team"] == get_away_team(reaction):
-                print("YO")
-                update_user_on_vote_remove(user_db, user, game, reaction, voted_team)
-        print(user["name"] + " un-voted for " + voted_team)
+                update_user_on_vote_remove(user_db, user, game, str(payload.emoji), voted_team)
+        print(user["username"] + " un-voted for " + voted_team)
 
     @bot.event
     async def on_reaction_add(reaction, user):
