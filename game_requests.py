@@ -26,6 +26,7 @@ def filter_data(data):
         if game_date.day != datetime.today().day and game_date.day != datetime.today().day + 1:
             continue
         date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ")
+        date = date.replace(day=datetime.today().day)
         home_team = game['home_team']
         away_team = game['away_team']
         for bookmaker in game['bookmakers']:
@@ -45,5 +46,3 @@ def filter_data(data):
 game_list = filter_data(get_data())
 for game in game_list:
     print(game)
-
-

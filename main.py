@@ -8,6 +8,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
+from db_functions import add_new_game
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")
@@ -20,8 +21,9 @@ def run():
 
     uri = os.getenv("MONGO_URI")
     client = MongoClient(uri)
-    db = client.user_data
-    db2 = client.server_data
+    game_db = client.game_data
+    server_db = client.server_data
+    user_db = client.user_data
     # Send a ping to confirm a successful connection
     try:
         client.admin.command('ping')
@@ -79,7 +81,7 @@ def run():
         now = datetime.datetime.now()
         # then = now + datetime.timedelta(days=1)
         # then.replace(hour=2, minute=0)
-        then = now.replace(hour=12, minute=12)
+        then = now.replace(hour=0, minute=1)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
@@ -87,6 +89,7 @@ def run():
         channel = bot.get_channel(1181446708232716321)
         await channel.send("NBA Games for: " + datetime.datetime.now().date().__str__())
         for game in game_data:
+            add_new_game(game_db, game)
             await channel.send(game)
         await channel.send("@everyone PLEASE VOTE!")
 
