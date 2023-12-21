@@ -62,6 +62,16 @@ def run():
             return
         team1_emoji = logo_table[get_away_team(reaction.message)]
         team2_emoji = logo_table[get_home_team(reaction.message)]
+        # IF REACTION WAS AFTER DAY OF CREATED MESSAGE
+        if reaction.message.created_at.date != datetime.datetime.today().date():
+            for r in reaction.message.reactions:
+                if str(r) == str(reaction):
+                    r.remove(user)
+            return
+
+        for game in get_today_games(game_db):
+            # FIND GAME
+            pass
         if str(reaction) == team1_emoji:
             for r in reaction.message.reactions:
                 if str(r) == team2_emoji:
@@ -70,11 +80,6 @@ def run():
             for r in reaction.message.reactions:
                 if str(r) == team1_emoji:
                     await r.remove(user)
-        # db.users.insert_one(
-        #     {
-        #
-        #     }
-        # )
         print(user.name + " voted for " + get_key(str(reaction)))
 
     async def send_daily_message():
