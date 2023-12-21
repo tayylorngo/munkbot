@@ -1,7 +1,5 @@
-WARNING    - 2023-12-21 16:43:37,533 - client          : PyNaCl is not installed, voice will NOT be supported
-INFO       - 2023-12-21 16:43:41,945 - client          : logging in using static token
-INFO       - 2023-12-21 16:43:42,673 - gateway         : Shard ID None has connected to Gateway (Session ID: 107a30509f2fc00745feda7d9302a74b).
-WARNING    - 2023-12-21 16:43:45,832 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187510752668553216/reactions/%3Apelicans%3A1186728286387195987/@me responded with 429. Retrying in 0.30 seconds.
-WARNING    - 2023-12-21 16:43:46,249 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187510752668553216/reactions/%3Apelicans%3A1186728286387195987/@me responded with 429. Retrying in 0.30 seconds.
-WARNING    - 2023-12-21 16:43:46,645 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187510752668553216/reactions/%3Apelicans%3A1186728286387195987/@me responded with 429. Retrying in 0.30 seconds.
-WARNING    - 2023-12-21 16:43:47,039 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187510754027511840/reactions/%3Agrizzlies%3A1186728257144500254/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-21 18:34:04,686 - client          : PyNaCl is not installed, voice will NOT be supported
+INFO       - 2023-12-21 18:34:09,129 - client          : logging in using static token
+INFO       - 2023-12-21 18:34:09,763 - gateway         : Shard ID None has connected to Gateway (Session ID: 8e7255c1520d9f0b76175108376a0613).
+WARNING    - 2023-12-21 18:34:12,915 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187538549285851236/reactions/%3Apelicans%3A1186728286387195987/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-21 18:34:13,510 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187538549961129986/reactions/%3Abulls%3A1186728249473118208/@me responded with 429. Retrying in 0.30 seconds.

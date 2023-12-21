@@ -35,3 +35,31 @@ def game_add_message_id(db, game, message_id):
     db.games.update_one(game_filter, new_values)
 
 
+def update_game_votes(db, user, voted_team, message):
+    game = get_game(db, message.id)
+    home_team_voters = game["home_team_voters"]
+    away_team_voters = game["away_team_voters"]
+    if voted_team == game["home_team"]:
+        home_team_voters.append(user.id)
+    else:
+        away_team_voters.append(user.id)
+    if len(home_team_voters) > len(away_team_voters):
+        majority_team = game["home_team"]
+    elif len(home_team_voters) < len(away_team_voters):
+        majority_team = game["away_team"]
+    else:
+        majority_team = "tie"
+
+    game_filter = {'message_id': message.id}
+    new_values = {"$set": {
+        "home_team_voters": home_team_voters,
+        "away_team_voters": away_team_voters,
+        "majority_team": majority_team
+    }}
+    db.games.update_one(game_filter, new_values)
+
+
+def get_game(db, message_id):
+    key = {"message_id": message_id}
+    return db.games.find_one(key)
+

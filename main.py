@@ -8,7 +8,7 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id
+from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
@@ -90,6 +90,8 @@ def run():
                     add_new_user(user_db, game, user, reaction, voted_team)
                 else:
                     update_user_on_vote(user_db, voting_user, game, reaction, voted_team)
+                update_game_votes(game_db, user, voted_team, reaction.message)
+                break
 
         if str(reaction) == team1_emoji:
             for r in reaction.message.reactions:
