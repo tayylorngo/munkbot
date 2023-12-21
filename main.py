@@ -1,5 +1,8 @@
 import datetime
 import asyncio
+import os
+
+from pymongo import MongoClient
 
 import settings
 import discord
@@ -14,6 +17,17 @@ def run():
     intents = discord.Intents.default()
     intents.message_content = True
     bot = commands.Bot(command_prefix="!", intents=intents)
+
+    uri = os.getenv("MONGO_URI")
+    client = MongoClient(uri)
+    db = client.user_data
+    db2 = client.server_data
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+    except Exception as e:
+        print(e)
 
     @bot.event
     async def on_ready():
@@ -37,9 +51,8 @@ def run():
 
     @bot.event
     async def on_raw_reaction_remove(payload):
-        pass
-        #print("HELLO")
-        #print(payload.user_id)
+        user = await bot.fetch_user(payload.user_id)
+        print(user.name + " un-voted for " + get_key(str(payload.emoji)))
 
     @bot.event
     async def on_reaction_add(reaction, user):
@@ -55,13 +68,18 @@ def run():
             for r in reaction.message.reactions:
                 if str(r) == team1_emoji:
                     await r.remove(user)
+        # db.users.insert_one(
+        #     {
+        #
+        #     }
+        # )
         print(user.name + " voted for " + get_key(str(reaction)))
 
     async def send_daily_message():
         now = datetime.datetime.now()
         # then = now + datetime.timedelta(days=1)
         # then.replace(hour=2, minute=0)
-        then = now.replace(hour=20, minute=11)
+        then = now.replace(hour=12, minute=12)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
