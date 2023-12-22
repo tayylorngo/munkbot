@@ -5,3 +5,5 @@ WARNING    - 2023-12-22 08:09:34,162 - http            : We are being rate limit
 WARNING    - 2023-12-22 08:09:34,779 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743733924503553/reactions/%3Anuggets%3A1186728281672777790/@me responded with 429. Retrying in 0.30 seconds.
 WARNING    - 2023-12-22 08:09:35,221 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743733924503553/reactions/%3Anuggets%3A1186728281672777790/@me responded with 429. Retrying in 0.30 seconds.
 WARNING    - 2023-12-22 08:09:35,864 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743736390754344/reactions/%3Arockets%3A1186732366899724318/@me responded with 429. Retrying in 0.30 seconds.
+INFO       - 2023-12-22 09:16:09,158 - gateway         : Shard ID None session has been invalidated.
+INFO       - 2023-12-22 09:16:14,888 - gateway         : Shard ID None has connected to Gateway (Session ID: 7072f5cfd1d0512c0102f1dfb3aa73f3).
