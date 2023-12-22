@@ -38,7 +38,7 @@ def update_user_on_vote(db, user, game, reaction, voted_team):
     new_teams_voted_on = user["teams_voted_on"]
     count = 1
     if voted_team in new_teams_voted_on:
-        count = new_teams_voted_on['teams_voted_on'][get_key(reaction)] + 1
+        count = new_teams_voted_on[voted_team] + 1
     new_teams_voted_on.update(
         {
             voted_team: count

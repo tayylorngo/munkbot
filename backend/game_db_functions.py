@@ -35,14 +35,20 @@ def game_add_message_id(db, game, message_id):
     db.games.update_one(game_filter, new_values)
 
 
-def update_game_votes(db, user, voted_team, message):
+def update_game_votes(db, user, voted_team, message, add):
     game = get_game(db, message.id)
     home_team_voters = game["home_team_voters"]
     away_team_voters = game["away_team_voters"]
-    if voted_team == game["home_team"]:
-        home_team_voters.append(user.id)
+    if add:
+        if voted_team == game["home_team"]:
+            home_team_voters.append(user["user_id"])
+        else:
+            away_team_voters.append(user["user_id"])
     else:
-        away_team_voters.append(user.id)
+        if voted_team == game["home_team"]:
+            home_team_voters.remove(user["user_id"])
+        else:
+            away_team_voters.remove(user["user_id"])
     if len(home_team_voters) > len(away_team_voters):
         majority_team = game["home_team"]
     elif len(home_team_voters) < len(away_team_voters):

@@ -1,4 +1,5 @@
 import datetime
+import pytz
 import asyncio
 import os
 
@@ -13,6 +14,7 @@ from backend.user_db_functions import get_user, add_new_user, update_user_on_vot
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 
 logger = settings.logging.getLogger("bot")
+
 
 def run():
     intents = discord.Intents.default()
@@ -60,6 +62,8 @@ def run():
         for game in get_today_games(game_db):
             if game["home_team"] == get_home_team(reaction) and game["away_team"] == get_away_team(reaction):
                 update_user_on_vote_remove(user_db, user, game, str(payload.emoji), voted_team)
+                update_game_votes(game_db, user, voted_team, reaction, False)
+                break
         print(user["username"] + " un-voted for " + voted_team)
 
     @bot.event
@@ -76,7 +80,10 @@ def run():
         team1_emoji = logo_table[get_away_team(reaction.message)]
         team2_emoji = logo_table[get_home_team(reaction.message)]
         # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
-        if reaction.message.created_at.date() != datetime.datetime.now().date():
+        created_on_date = reaction.message.created_at.astimezone(pytz.timezone('US/Eastern'))
+        if created_on_date.date() != datetime.datetime.now().date():
+            print(reaction.message.created_at.date())
+            print(datetime.datetime.now().date())
             for r in reaction.message.reactions:
                 if str(r) == str(reaction):
                     await r.remove(user)
@@ -90,7 +97,8 @@ def run():
                     add_new_user(user_db, game, user, reaction, voted_team)
                 else:
                     update_user_on_vote(user_db, voting_user, game, reaction, voted_team)
-                update_game_votes(game_db, user, voted_team, reaction.message)
+                voting_user = get_user(user_db, user.id)
+                update_game_votes(game_db, voting_user, voted_team, reaction.message, True)
                 break
 
         if str(reaction) == team1_emoji:
