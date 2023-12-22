@@ -44,6 +44,17 @@ def update_user_on_vote(db, user, game, reaction, voted_team):
             voted_team: count
         }
     )
+    curr = 0
+    curr2 = max(new_teams_voted_on.values())
+    favorite_team = ""
+    least_favorite_team = ""
+    for key in new_teams_voted_on.keys():
+        if new_teams_voted_on[key] >= curr:
+            curr = new_teams_voted_on[key]
+            favorite_team = key
+        if new_teams_voted_on[key] <= curr2:
+            curr2 = new_teams_voted_on[key]
+            least_favorite_team = key
     if game["home_team"] == voted_team:
         new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * (len(user["games_voted_on"]) - 1)
                              + game["home_team_odds"]) / (len(user["games_voted_on"])))
@@ -52,7 +63,7 @@ def update_user_on_vote(db, user, game, reaction, voted_team):
                              + game["away_team_odds"]) / (len(user["games_voted_on"])))
     update_user_betting_stats(db, user, new_betting_odds
                               , user['betting_stats'], new_games_voted_on_list,
-                              new_teams_voted_on)
+                              new_teams_voted_on, favorite_team, least_favorite_team)
 
 
 def update_user_on_vote_remove(db, user, game, reaction, voted_team):
@@ -65,6 +76,18 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
             voted_team: count
         }
     )
+    curr = 0
+    curr2 = max(new_teams_voted_on.values())
+    favorite_team = ""
+    least_favorite_team = ""
+    for key in new_teams_voted_on.keys():
+        if new_teams_voted_on[key] >= curr:
+            curr = new_teams_voted_on[key]
+            favorite_team = key
+        if new_teams_voted_on[key] <= curr2:
+            curr2 = new_teams_voted_on[key]
+            least_favorite_team = key
+
     if len(user["games_voted_on"]) == 0:
         new_betting_odds = 0
     elif game["home_team"] == voted_team:
@@ -75,13 +98,18 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
                              - game["away_team_odds"]) / (len(user["games_voted_on"])))
 
     update_user_betting_stats(db, user, new_betting_odds
-                              , user['betting_stats'], new_games_voted_on_list, new_teams_voted_on)
+                              , user['betting_stats'], new_games_voted_on_list,
+                              new_teams_voted_on, favorite_team, least_favorite_team)
 
 
-def update_user_betting_stats(db, user, new_betting_odds, new_betting_stats, new_games_voted_on_list, new_teams_voted_on):
+def update_user_betting_stats(db, user, new_betting_odds,
+                              new_betting_stats, new_games_voted_on_list,
+                              new_teams_voted_on, favorite_team, least_favorite_team):
     new_betting_stats.update(
         {
-            "average_betting_odds": new_betting_odds
+            "average_betting_odds": new_betting_odds,
+            "favorite_team": favorite_team,
+            "least_favorite_team": least_favorite_team
         }
     )
     user_filter = {'user_id': user["user_id"]}

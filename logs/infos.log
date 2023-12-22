@@ -1,4 +1,7 @@
-WARNING    - 2023-12-21 22:22:03,139 - client          : PyNaCl is not installed, voice will NOT be supported
-INFO       - 2023-12-21 22:22:07,580 - client          : logging in using static token
-INFO       - 2023-12-21 22:22:08,125 - gateway         : Shard ID None has connected to Gateway (Session ID: 188f1fb3bf9d7c51b0c93f58c4d69f14).
-WARNING    - 2023-12-21 22:22:11,633 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187595923086389248/reactions/%3Atimberwolves%3A1186728294989713408/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-22 08:09:27,620 - client          : PyNaCl is not installed, voice will NOT be supported
+INFO       - 2023-12-22 08:09:28,985 - client          : logging in using static token
+INFO       - 2023-12-22 08:09:29,866 - gateway         : Shard ID None has connected to Gateway (Session ID: b2a1047fef7595bda54eca681e5e2e0a).
+WARNING    - 2023-12-22 08:09:34,162 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743733924503553/reactions/%3Anuggets%3A1186728281672777790/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-22 08:09:34,779 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743733924503553/reactions/%3Anuggets%3A1186728281672777790/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-22 08:09:35,221 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743733924503553/reactions/%3Anuggets%3A1186728281672777790/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-22 08:09:35,864 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1187743736390754344/reactions/%3Arockets%3A1186732366899724318/@me responded with 429. Retrying in 0.30 seconds.
