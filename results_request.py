@@ -14,12 +14,12 @@ headers = {
 }
 
 
-def get_data():
+def get_game_results():
     response = requests.get(url, headers=headers, params=querystring)
     return response.json()
 
 
-def filter_data(games, game_date):
+def filter_results_data(games, game_date):
     results = []
     for game in games:
         if convert_utc_to_est(game['commence_time']) == game_date:
@@ -38,4 +38,4 @@ def convert_utc_to_est(utc_datetime_str):
     return est_date
 
 
-filter_data(get_data(), date.today() - timedelta(days=1))
+filter_results_data(get_game_results(), date.today() - timedelta(days=1))

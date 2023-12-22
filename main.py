@@ -9,9 +9,11 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes
+from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
+    get_yesterday_games, update_game_results
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
+from results_request import get_game_results, filter_results_data
 
 logger = settings.logging.getLogger("bot")
 
@@ -37,6 +39,7 @@ def run():
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         await send_daily_message()
+        await update_game_results_message()
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -126,6 +129,20 @@ def run():
             add_new_game(game_db, game)
             await channel.send(game)
         await channel.send("@everyone PLEASE VOTE!")
+
+    async def update_game_results_message():
+        now = datetime.datetime.now()
+        # then = now + datetime.timedelta(days=1)
+        # then.replace(hour=2, minute=0)
+        then = now.replace(hour=0, minute=1)
+        wait_time = (then - now).total_seconds()
+        await asyncio.sleep(wait_time)
+
+        yesterday_date = datetime.date.today() - datetime.timedelta(days=1)
+        game_results = filter_results_data(get_game_results(), datetime.date.today())
+        for game in game_results:
+            update_game_results(game_db, game)
+
 
     bot.run(settings.TOKEN, root_logger=True)
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def add_new_game(db, game):
@@ -22,9 +22,14 @@ def add_new_game(db, game):
 def get_today_games(db):
     key = {"date": datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)}
     today_games = db.games.find(key)
-    # for game in today_games:
-    #     print(game)
     return today_games
+
+
+def get_yesterday_games(db):
+    yesterday_date = datetime.today() - timedelta(days=1)
+    key = {"date": yesterday_date.replace(hour=0, minute=0, second=0, microsecond=0)}
+    yesterday_games = db.games.find(key)
+    return yesterday_games
 
 
 def game_add_message_id(db, game, message_id):
@@ -65,7 +70,10 @@ def update_game_votes(db, user, voted_team, message, add):
     db.games.update_one(game_filter, new_values)
 
 
+def update_game_results(db, game):
+    pass
+
+
 def get_game(db, message_id):
     key = {"message_id": message_id}
     return db.games.find_one(key)
-
