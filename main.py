@@ -39,7 +39,7 @@ def run():
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         await send_daily_message()
-        await update_game_results_message()
+        # await update_game_results_message()
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -139,10 +139,10 @@ def run():
         await asyncio.sleep(wait_time)
 
         yesterday_date = datetime.date.today() - datetime.timedelta(days=1)
-        game_results = filter_results_data(get_game_results(), datetime.date.today())
+        game_results = filter_results_data(get_game_results(), yesterday_date)
         for game in game_results:
             update_game_results(game_db, game)
-
+        # UPDATE MESSAGES NEXT AND USER PERCENTAGE AND SERVER DATA
 
     bot.run(settings.TOKEN, root_logger=True)
 

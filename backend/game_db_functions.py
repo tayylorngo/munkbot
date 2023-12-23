@@ -71,7 +71,22 @@ def update_game_votes(db, user, voted_team, message, add):
 
 
 def update_game_results(db, game):
-    pass
+    game_date = datetime.strptime(game["commence_time"], '%Y-%m-%d').date()
+    home_team_score = game['scores'][0]['score']
+    away_team_score = game['scores'][1]['score']
+    if home_team_score > away_team_score:
+        winning_team = game['scores'][0]['name']
+    else:
+        winning_team = game['scores'][1]['name']
+    new_values = {"$set": {
+        "winning_team": winning_team
+    }}
+    game_filter = {
+        "date": game_date,
+        "home_team": game['home_team'],
+        "away_team": game['away_team']
+    }
+    db.games.update_one(game_filter, new_values)
 
 
 def get_game(db, message_id):
