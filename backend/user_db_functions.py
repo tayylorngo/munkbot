@@ -16,6 +16,8 @@ def add_new_user(db, game, user, reaction, voted_team):
                 get_key(str(reaction)): 1
             },
             "betting_stats": {
+                "wins": 0,
+                "losses": 0,
                 "average_betting_odds": odds,
                 "win_percent": 0,
                 "lose_percent": 0,
@@ -32,7 +34,7 @@ def get_user(db, user_id):
     return user
 
 
-def update_user_on_vote(db, user, game, reaction, voted_team):
+def update_user_on_vote(db, user, game, voted_team):
     new_games_voted_on_list = user["games_voted_on"]
     new_games_voted_on_list.append(game["_id"])
     new_teams_voted_on = user["teams_voted_on"]
@@ -119,4 +121,23 @@ def update_user_betting_stats(db, user, new_betting_odds,
         "betting_stats": new_betting_stats
     }}
     db.users.update_one(user_filter, new_values)
+
+
+def update_user_results(db, game):
+    if game['home_team'] == game['winning_team']:
+        for user_id in game['home_team_voters']:
+            user = get_user(db, user_id)
+            user_betting_stats = user['betting_stats']
+            user_betting_stats.update({
+                "wins": user_betting_stats['wins'] + 1,
+                "win_percent": (user_betting_stats['wins'] + 1) / (user_betting_stats['wins']
+                                                                   + user_betting_stats['losses'] + 1),
+                "lose_percent": user_betting_stats['losses'] / (user_betting_stats['wins']
+                                                                + user_betting_stats['losses'] + 1),
+            })
+            user_filter = {'user_id': user_id}
+            new_values = {"$set": {
+                "betting_stats": user_betting_stats
+            }}
+            db.users.update_one(user_filter, new_values)
 

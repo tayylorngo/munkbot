@@ -9,9 +9,9 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
-    get_yesterday_games, update_game_results
-from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove
+from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, get_yesterday_games, update_game_results
+from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
+    update_user_results
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
 
@@ -38,7 +38,7 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        await send_daily_message()
+        # await send_daily_message()
         # await update_game_results_message()
 
     def get_game_data():
@@ -60,6 +60,8 @@ def run():
     async def on_raw_reaction_remove(payload):
         channel = bot.get_channel(1181446708232716321)
         reaction = await channel.fetch_message(payload.message_id)
+        if reaction.created_on_date.date() != datetime.datetime.now().date():
+            return
         user = get_user(user_db, payload.user_id)
         voted_team = get_key(str(payload.emoji))
         for game in get_today_games(game_db):
@@ -71,6 +73,8 @@ def run():
 
     @bot.event
     async def on_reaction_add(reaction, user):
+        if str(reaction) not in logo_table.values():
+            return
         today_games = get_today_games(game_db)
         if user == bot.user:
             for game in today_games:
@@ -99,7 +103,7 @@ def run():
                 if not voting_user:
                     add_new_user(user_db, game, user, reaction, voted_team)
                 else:
-                    update_user_on_vote(user_db, voting_user, game, reaction, voted_team)
+                    update_user_on_vote(user_db, voting_user, game, voted_team)
                 voting_user = get_user(user_db, user.id)
                 update_game_votes(game_db, voting_user, voted_team, reaction.message, True)
                 break
@@ -142,7 +146,16 @@ def run():
         game_results = filter_results_data(get_game_results(), yesterday_date)
         for game in game_results:
             update_game_results(game_db, game)
+            update_user_results(game_db, game)
         # UPDATE MESSAGES NEXT AND USER PERCENTAGE AND SERVER DATA
+        yesterday_games = get_yesterday_games(game_db)
+        channel = bot.get_channel(1181446708232716321)
+        for game in yesterday_games:
+            message = await channel.fetch_message(game['message_id'])
+            if game['winning_team'] == game['majority_team']:
+                await message.add_reaction("✅")
+            else:
+                await message.add_reaction("❌")
 
     bot.run(settings.TOKEN, root_logger=True)
 
