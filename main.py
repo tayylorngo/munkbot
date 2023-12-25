@@ -39,7 +39,7 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        # await send_daily_message()
+        await send_daily_message()
         await update_game_results_message()
 
     def get_game_data():

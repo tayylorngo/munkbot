@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from game import Game
+from results_request import convert_utc_to_est
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
@@ -22,8 +23,9 @@ def get_data():
 def filter_data(data):
     results = []
     for game in data:
-        game_date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ").astimezone()
-        if game_date.day != datetime.today().day and game_date.day != datetime.today().day + 1:
+        game_date = convert_utc_to_est(game['commence_time'])
+
+        if game_date != datetime.today().date():
             continue
         date = datetime.strptime(game['commence_time'], "%Y-%m-%dT%H:%M:%SZ")
         date = date.replace(day=datetime.today().day, hour=0, minute=0, second=0, microsecond=0)
