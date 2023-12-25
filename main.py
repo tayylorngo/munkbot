@@ -143,7 +143,7 @@ def run():
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
-        yesterday_date = datetime.date.today() - datetime.timedelta(days=2)
+        yesterday_date = datetime.date.today() - datetime.timedelta(days=1)
         game_results = filter_results_data(get_game_results(), yesterday_date)
 
         for game in game_results:
@@ -168,6 +168,7 @@ def run():
             )
         server_stats = server_db.games.find_one({"name": "red_army"})
         channel = bot.get_channel(1181446708232716321)
+        yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
             if game['majority_team'] in server_stats['voted_teams']:
                 server_stats['voted_teams'].update(

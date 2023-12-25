@@ -11,7 +11,7 @@ def add_new_game(db, game):
             "home_team_odds": game.home_team_odds,
             "winning_team": "",
             "losing_team": "",
-            "majority_team": "",
+            "majority_team": "tie",
             "away_team_voters": [],
             "home_team_voters": [],
             "message_id": ""
@@ -26,7 +26,7 @@ def get_today_games(db):
 
 
 def get_yesterday_games(db):
-    yesterday_date = datetime.today() - timedelta(days=2) # CHANGE BACK TO 1
+    yesterday_date = datetime.today() - timedelta(days=1)
     key = {"date": yesterday_date.replace(hour=0, minute=0, second=0, microsecond=0)}
     yesterday_games = db.games.find(key)
     return yesterday_games
@@ -92,3 +92,4 @@ def update_game_results(db, game):
 def get_game(db, message_id):
     key = {"message_id": message_id}
     return db.games.find_one(key)
+

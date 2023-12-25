@@ -7,7 +7,7 @@ from datetime import datetime, date, timedelta
 load_dotenv()
 url = "https://odds.p.rapidapi.com/v4/sports/basketball_nba/scores"
 API_KEY = os.getenv("RESULTS_API_KEY")
-querystring = {"daysFrom": "3"}
+querystring = {"daysFrom": "2"}
 headers = {
     "X-RapidAPI-Key": API_KEY,
     "X-RapidAPI-Host": "odds.p.rapidapi.com"
