@@ -1,5 +1,6 @@
 import datetime
 import pytz
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import asyncio
 import os
 
@@ -40,8 +41,10 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        await send_daily_message()
-        await update_game_results_message()
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0)
+        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
+        scheduler.start()
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -119,13 +122,6 @@ def run():
         print(user.name + " voted for " + voted_team)
 
     async def send_daily_message():
-        now = datetime.datetime.now()
-        then = now + datetime.timedelta(days=1)
-        then.replace(hour=2, minute=0)
-        # then = now.replace(hour=0, minute=1)
-        wait_time = (then - now).total_seconds()
-        await asyncio.sleep(wait_time)
-
         game_data = get_game_data()
         channel = bot.get_channel(1181446708232716321)
         await channel.send("NBA Games for: " + datetime.datetime.now().date().__str__())
@@ -135,13 +131,6 @@ def run():
         await channel.send("@everyone PLEASE VOTE!")
 
     async def update_game_results_message():
-        now = datetime.datetime.now()
-        then = now + datetime.timedelta(days=1)
-        then.replace(hour=2, minute=0)
-        # then = now.replace(hour=0, minute=1)
-        wait_time = (then - now).total_seconds()
-        await asyncio.sleep(wait_time)
-
         yesterday_date = datetime.date.today() - datetime.timedelta(days=1)
         game_results = filter_results_data(get_game_results(), yesterday_date)
 
