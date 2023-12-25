@@ -26,7 +26,7 @@ def get_today_games(db):
 
 
 def get_yesterday_games(db):
-    yesterday_date = datetime.today() - timedelta(days=1)
+    yesterday_date = datetime.today() - timedelta(days=2) # CHANGE BACK TO 1
     key = {"date": yesterday_date.replace(hour=0, minute=0, second=0, microsecond=0)}
     yesterday_games = db.games.find(key)
     return yesterday_games
@@ -72,8 +72,8 @@ def update_game_votes(db, user, voted_team, message, add):
 
 def update_game_results(db, game):
     game_date = datetime.strptime(game["commence_time"], '%Y-%m-%d').date()
-    home_team_score = game['scores'][0]['score']
-    away_team_score = game['scores'][1]['score']
+    home_team_score = int(game['scores'][0]['score'])
+    away_team_score = int(game['scores'][1]['score'])
     if home_team_score > away_team_score:
         winning_team = game['scores'][0]['name']
     else:
@@ -82,7 +82,7 @@ def update_game_results(db, game):
         "winning_team": winning_team
     }}
     game_filter = {
-        "date": game_date,
+        "date": datetime.combine(game_date, datetime.min.time()),
         "home_team": game['home_team'],
         "away_team": game['away_team']
     }

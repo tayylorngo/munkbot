@@ -9,7 +9,8 @@ import settings
 import discord
 from discord.ext import commands
 import game_requests
-from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, get_yesterday_games, update_game_results
+from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
+    get_yesterday_games, update_game_results
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
     update_user_results
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
@@ -39,7 +40,7 @@ def run():
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         # await send_daily_message()
-        # await update_game_results_message()
+        await update_game_results_message()
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -60,7 +61,7 @@ def run():
     async def on_raw_reaction_remove(payload):
         channel = bot.get_channel(1181446708232716321)
         reaction = await channel.fetch_message(payload.message_id)
-        if reaction.created_on_date.date() != datetime.datetime.now().date():
+        if reaction.created_at.date() != datetime.datetime.now().date():
             return
         user = get_user(user_db, payload.user_id)
         voted_team = get_key(str(payload.emoji))
@@ -89,8 +90,8 @@ def run():
         # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
         created_on_date = reaction.message.created_at.astimezone(pytz.timezone('US/Eastern'))
         if created_on_date.date() != datetime.datetime.now().date():
-            print(reaction.message.created_at.date())
-            print(datetime.datetime.now().date())
+            # print(reaction.message.created_at.date())
+            # print(datetime.datetime.now().date())
             for r in reaction.message.reactions:
                 if str(r) == str(reaction):
                     await r.remove(user)
@@ -142,20 +143,77 @@ def run():
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
-        yesterday_date = datetime.date.today() - datetime.timedelta(days=1)
+        yesterday_date = datetime.date.today() - datetime.timedelta(days=2)
         game_results = filter_results_data(get_game_results(), yesterday_date)
+
         for game in game_results:
             update_game_results(game_db, game)
-            update_user_results(game_db, game)
-        # UPDATE MESSAGES NEXT AND USER PERCENTAGE AND SERVER DATA
+
         yesterday_games = get_yesterday_games(game_db)
+        for game in yesterday_games:
+            update_user_results(game_db, game)
+
+        server_stats = server_db.games.find_one({"name": "red_army"})
+        if not server_stats:
+            server_db.games.insert_one(
+                {
+                    "name": "red_army",
+                    "wins": 0,
+                    "losses": 0,
+                    "ties": 0,
+                    "favorite_team": "",
+                    "least_favorite_team": "",
+                    "voted_teams": {}
+                }
+            )
+        server_stats = server_db.games.find_one({"name": "red_army"})
         channel = bot.get_channel(1181446708232716321)
         for game in yesterday_games:
+            if game['majority_team'] in server_stats['voted_teams']:
+                server_stats['voted_teams'].update(
+                    {
+                        game['majority_team']: (server_stats['voted_teams'][game['majority_team']]) + 1
+                    }
+                )
+            else:
+                server_stats['voted_teams'].update(
+                    {
+                        game['majority_team']: 1
+                    }
+                )
             message = await channel.fetch_message(game['message_id'])
             if game['winning_team'] == game['majority_team']:
+                server_stats['wins'] += 1
                 await message.add_reaction("✅")
+            elif game['majority_team'] == "tie":
+                server_stats['ties'] += 1
+                await message.add_reaction("↔️")
             else:
+                server_stats['losses'] += 1
                 await message.add_reaction("❌")
+
+        curr = 0
+        curr2 = max(server_stats['voted_teams'].values(), default=0)
+        favorite_team = ""
+        least_favorite_team = ""
+        for key in server_stats['voted_teams'].keys():
+            if server_stats['voted_teams'][key] >= curr:
+                curr = server_stats['voted_teams'][key]
+                favorite_team = key
+            if server_stats['voted_teams'][key] <= curr2:
+                curr2 = server_stats['voted_teams'][key]
+                least_favorite_team = key
+
+        server_filter = {'name': "red_army"}
+        new_values = {"$set": {
+            "wins": server_stats["wins"],
+            "losses": server_stats["losses"],
+            "ties": server_stats["ties"],
+            "favorite_team": favorite_team,
+            "least_favorite_team": least_favorite_team,
+            "voted_teams": server_stats["voted_teams"]
+        }}
+        server_db.games.update_one(server_filter, new_values)
 
     bot.run(settings.TOKEN, root_logger=True)
 

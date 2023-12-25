@@ -7,7 +7,7 @@ from datetime import datetime, date, timedelta
 load_dotenv()
 url = "https://odds.p.rapidapi.com/v4/sports/basketball_nba/scores"
 API_KEY = os.getenv("RESULTS_API_KEY")
-querystring = {"daysFrom": "2"}
+querystring = {"daysFrom": "3"}
 headers = {
     "X-RapidAPI-Key": API_KEY,
     "X-RapidAPI-Host": "odds.p.rapidapi.com"
@@ -22,10 +22,11 @@ def get_game_results():
 def filter_results_data(games, game_date):
     results = []
     for game in games:
+        # print(game)
         if convert_utc_to_est(game['commence_time']) == game_date:
             game['commence_time'] = convert_utc_to_est(game['commence_time']).strftime('%Y-%m-%d')
             results.append(game)
-    print(results)
+    return results
 
 
 def convert_utc_to_est(utc_datetime_str):
@@ -38,4 +39,4 @@ def convert_utc_to_est(utc_datetime_str):
     return est_date
 
 
-filter_results_data(get_game_results(), date.today() - timedelta(days=1))
+# filter_results_data(get_game_results(), date.today() - timedelta(days=2))
