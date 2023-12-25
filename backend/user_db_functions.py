@@ -79,7 +79,7 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
         }
     )
     curr = 0
-    curr2 = max(new_teams_voted_on.values())
+    curr2 = max(new_teams_voted_on.values(), default=0)
     favorite_team = ""
     least_favorite_team = ""
     for key in new_teams_voted_on.keys():

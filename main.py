@@ -11,6 +11,7 @@ from discord.ext import commands
 import game_requests
 from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
     get_yesterday_games, update_game_results
+from backend.server_db_functions import init_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
     update_user_results
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
@@ -90,8 +91,6 @@ def run():
         # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
         created_on_date = reaction.message.created_at.astimezone(pytz.timezone('US/Eastern'))
         if created_on_date.date() != datetime.datetime.now().date():
-            # print(reaction.message.created_at.date())
-            # print(datetime.datetime.now().date())
             for r in reaction.message.reactions:
                 if str(r) == str(reaction):
                     await r.remove(user)
@@ -121,9 +120,9 @@ def run():
 
     async def send_daily_message():
         now = datetime.datetime.now()
-        # then = now + datetime.timedelta(days=1)
-        # then.replace(hour=2, minute=0)
-        then = now.replace(hour=0, minute=1)
+        then = now + datetime.timedelta(days=1)
+        then.replace(hour=2, minute=0)
+        # then = now.replace(hour=0, minute=1)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
@@ -137,9 +136,9 @@ def run():
 
     async def update_game_results_message():
         now = datetime.datetime.now()
-        # then = now + datetime.timedelta(days=1)
-        # then.replace(hour=2, minute=0)
-        then = now.replace(hour=0, minute=1)
+        then = now + datetime.timedelta(days=1)
+        then.replace(hour=2, minute=0)
+        # then = now.replace(hour=0, minute=1)
         wait_time = (then - now).total_seconds()
         await asyncio.sleep(wait_time)
 
@@ -155,17 +154,7 @@ def run():
 
         server_stats = server_db.games.find_one({"name": "red_army"})
         if not server_stats:
-            server_db.games.insert_one(
-                {
-                    "name": "red_army",
-                    "wins": 0,
-                    "losses": 0,
-                    "ties": 0,
-                    "favorite_team": "",
-                    "least_favorite_team": "",
-                    "voted_teams": {}
-                }
-            )
+            init_server_data(server_db)
         server_stats = server_db.games.find_one({"name": "red_army"})
         channel = bot.get_channel(1181446708232716321)
         yesterday_games = get_yesterday_games(game_db)

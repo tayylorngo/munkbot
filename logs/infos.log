@@ -1,3 +1,7 @@
-WARNING    - 2023-12-24 23:21:46,141 - client          : PyNaCl is not installed, voice will NOT be supported
-INFO       - 2023-12-24 23:21:50,589 - client          : logging in using static token
-INFO       - 2023-12-24 23:21:51,267 - gateway         : Shard ID None has connected to Gateway (Session ID: 6b2c0898108322d8032a004921f484c8).
+WARNING    - 2023-12-25 14:44:10,206 - client          : PyNaCl is not installed, voice will NOT be supported
+INFO       - 2023-12-25 14:44:14,639 - client          : logging in using static token
+INFO       - 2023-12-25 14:44:15,319 - gateway         : Shard ID None has connected to Gateway (Session ID: c7c1214c5ac93dd5a6557306b57c25db).
+WARNING    - 2023-12-25 14:44:18,569 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1188930238319706122/reactions/%3Aceltics%3A1186728253105389619/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-25 14:44:18,955 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1188930238319706122/reactions/%3Aceltics%3A1186728253105389619/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-25 14:44:19,363 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1188930238319706122/reactions/%3Aceltics%3A1186728253105389619/@me responded with 429. Retrying in 0.30 seconds.
+WARNING    - 2023-12-25 14:44:19,776 - http            : We are being rate limited. PUT https://discord.com/api/v10/channels/1181446708232716321/messages/1188930240181968936/reactions/%3Asuns%3A1186728954762113054/@me responded with 429. Retrying in 0.30 seconds.
