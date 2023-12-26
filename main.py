@@ -1,7 +1,6 @@
 import datetime
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import asyncio
 import os
 
 from pymongo import MongoClient
@@ -41,10 +40,15 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0)
-        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
-        scheduler.start()
+        await update_game_results_message()
+        # scheduler = AsyncIOScheduler()
+        # scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0)
+        # scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
+        # scheduler.start()
+
+    @bot.command()
+    async def ping(ctx):
+        await ctx.send("pong")
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -139,7 +143,7 @@ def run():
 
         yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
-            update_user_results(game_db, game)
+            update_user_results(user_db, game)
 
         server_stats = server_db.games.find_one({"name": "red_army"})
         if not server_stats:

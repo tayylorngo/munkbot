@@ -1,0 +1,8 @@
+datetime
+pytz~=2023.3.post1
+apscheduler~=3.10.4
+requests~=2.31.0
+pymongo~=4.6.1
+discord.py
+discord~=2.3.2
+python-dotenv~=1.0.0

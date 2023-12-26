@@ -1,7 +1,7 @@
 import os
-import logging
 
 from logging.config import dictConfig
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
