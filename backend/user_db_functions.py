@@ -125,19 +125,34 @@ def update_user_betting_stats(db, user, new_betting_odds,
 
 def update_user_results(db, game):
     if game['home_team'] == game['winning_team']:
-        for user_id in game['home_team_voters']:
-            user = get_user(db, user_id)
-            user_betting_stats = user['betting_stats']
-            user_betting_stats.update({
-                "wins": user_betting_stats['wins'] + 1,
-                "win_percent": (user_betting_stats['wins'] + 1) / (user_betting_stats['wins']
-                                                                   + user_betting_stats['losses'] + 1),
-                "lose_percent": user_betting_stats['losses'] / (user_betting_stats['wins']
-                                                                + user_betting_stats['losses'] + 1),
-            })
-            user_filter = {'user_id': user_id}
-            new_values = {"$set": {
-                "betting_stats": user_betting_stats
-            }}
-            db.users.update_one(user_filter, new_values)
+        winner = 'home_team'
+        loser = 'away_team'
+    else:
+        winner = 'away_team'
+        loser = 'home_team'
 
+    for user_id in game[winner]:
+        user = get_user(db, user_id)
+        user_betting_stats = user['betting_stats']
+        user_betting_stats.update({
+            "wins": user_betting_stats['wins'] + 1,
+            "win_percent": (user_betting_stats['wins'] + 1) / (user_betting_stats['wins']
+                                                               + user_betting_stats['losses'] + 1),
+            "lose_percent": user_betting_stats['losses'] / (user_betting_stats['wins']
+                                                            + user_betting_stats['losses'] + 1),
+        })
+        user_filter = {'user_id': user_id}
+        new_values = {"$set": {
+            "betting_stats": user_betting_stats
+        }}
+        db.users.update_one(user_filter, new_values)
+    for user_id in game[loser]:
+        user = get_user(db, user_id)
+        user_betting_stats = user['betting_stats']
+        user_betting_stats.update({
+            "wins": user_betting_stats['losses'] + 1,
+            "win_percent": user_betting_stats['wins'] / (user_betting_stats['wins']
+                                                         + user_betting_stats['losses'] + 1),
+            "lose_percent": (user_betting_stats['losses'] + 1) / (user_betting_stats['wins']
+                                                                  + user_betting_stats['losses'] + 1),
+        })
