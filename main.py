@@ -41,10 +41,10 @@ def run():
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         await update_game_results_message()
-        # scheduler = AsyncIOScheduler()
-        # scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0)
-        # scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
-        # scheduler.start()
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0)
+        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
+        scheduler.start()
 
     @bot.command()
     async def ping(ctx):
