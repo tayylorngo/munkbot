@@ -11,7 +11,7 @@ from discord.ext import commands
 import game_requests
 from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
     get_yesterday_games, update_game_results
-from backend.server_db_functions import init_server_data
+from backend.server_db_functions import init_server_data, get_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
     update_user_results
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
@@ -50,20 +50,26 @@ def run():
     async def ping(ctx):
         await ctx.send("pong")
 
+    @bot.command()
+    async def stats(ctx):
+        server_stats = get_server_data(server_db)
+        await ctx.send("CURRENT RECORD: " + str(server_stats["wins"]) + "W-" + str(server_stats["losses"]) + "L-"
+                       + str(server_stats["ties"]) + "T")
+
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
 
     @bot.event
     async def on_message(message):
-        if "@" not in message.content or "@everyone" in message.content:
-            return
         if message.author == bot.user:
-            away_emoji = logo_table[get_away_team(message)]
-            home_emoji = logo_table[get_home_team(message)]
-            await message.add_reaction(away_emoji)
-            await message.add_reaction(home_emoji)
-        else:
-            return
+            if "@everyone" in message.content or "NBA Games" in message.content:
+                return
+            if "@" in message.content:
+                away_emoji = logo_table[get_away_team(message)]
+                home_emoji = logo_table[get_home_team(message)]
+                await message.add_reaction(away_emoji)
+                await message.add_reaction(home_emoji)
+        await bot.process_commands(message)
 
     @bot.event
     async def on_raw_reaction_remove(payload):

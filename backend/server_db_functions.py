@@ -10,3 +10,11 @@ def init_server_data(db):
             "voted_teams": {}
         }
     )
+
+
+def get_server_data(db):
+    return db.games.find_one(
+        {
+            "name": "red_army"
+        }
+    )
