@@ -43,7 +43,7 @@ def run():
         await update_game_results_message()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
-        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
+        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
         scheduler.start()
 
     @bot.command()
