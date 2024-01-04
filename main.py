@@ -42,7 +42,7 @@ def run():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         await update_game_results_message()
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0)
+        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
         scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0)
         scheduler.start()
 
@@ -67,7 +67,7 @@ def run():
 
     @bot.event
     async def on_raw_reaction_remove(payload):
-        channel = bot.get_channel(1181446708232716321)
+        channel = bot.get_channel(payload.channel_id)
         reaction = await channel.fetch_message(payload.message_id)
         if reaction.created_at.date() != datetime.datetime.now().date():
             return
@@ -128,6 +128,7 @@ def run():
     async def send_daily_message():
         game_data = get_game_data()
         channel = bot.get_channel(1181446708232716321)
+        # 1166613333630267412
         await channel.send("NBA Games for: " + datetime.datetime.now().date().__str__())
         for game in game_data:
             add_new_game(game_db, game)
@@ -150,6 +151,7 @@ def run():
             init_server_data(server_db)
         server_stats = server_db.games.find_one({"name": "red_army"})
         channel = bot.get_channel(1181446708232716321)
+        # 1166613333630267412
         yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
             if game['majority_team'] in server_stats['voted_teams']:
