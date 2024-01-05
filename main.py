@@ -1,8 +1,8 @@
 import datetime
 import pytz
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import os
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pymongo import MongoClient
 
 import settings
@@ -40,7 +40,6 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        await update_game_results_message()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
         scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")

@@ -125,11 +125,11 @@ def update_user_betting_stats(db, user, new_betting_odds,
 
 def update_user_results(db, game):
     if game['home_team'] == game['winning_team']:
-        winner = 'home_team'
-        loser = 'away_team'
+        winner = 'home_team_voters'
+        loser = 'away_team_voters'
     else:
-        winner = 'away_team'
-        loser = 'home_team'
+        winner = 'away_team_voters'
+        loser = 'home_team_voters'
 
     for user_id in game[winner]:
         user = get_user(db, user_id)
