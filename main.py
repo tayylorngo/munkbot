@@ -52,8 +52,11 @@ def run():
     @bot.command()
     async def stats(ctx):
         server_stats = get_server_data(server_db)
-        await ctx.send("CURRENT RECORD: " + str(server_stats["wins"]) + "W-" + str(server_stats["losses"]) + "L-"
+        if server_stats:
+            await ctx.send("CURRENT RECORD: " + str(server_stats["wins"]) + "W-" + str(server_stats["losses"]) + "L-"
                        + str(server_stats["ties"]) + "T")
+        else:
+            await ctx.send("No stats available as of now")
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
