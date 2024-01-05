@@ -86,46 +86,45 @@ def run():
         print(user["username"] + " un-voted for " + voted_team)
 
     @bot.event
-    async def on_reaction_add(reaction, user):
-        if str(reaction) not in logo_table.values():
+    async def on_raw_reaction_add(payload):
+        if str(payload.emoji) not in logo_table.values():
             return
         today_games = get_today_games(game_db)
-        if user == bot.user:
+        channel = bot.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        user = await bot.fetch_user(payload.user_id)
+        if payload.user_id == bot.user.id:
             for game in today_games:
-                if (game["home_team"] == get_home_team(reaction.message)
-                        and game["away_team"] == get_away_team(reaction.message)):
-                    game_add_message_id(game_db, game, reaction.message.id)
-            return
+                if (game["home_team"] == get_home_team(message)
+                        and game["away_team"] == get_away_team(message)):
+                    game_add_message_id(game_db, game, payload.message_id)
 
-        voted_team = get_key(str(reaction))
-        team1_emoji = logo_table[get_away_team(reaction.message)]
-        team2_emoji = logo_table[get_home_team(reaction.message)]
+        voted_team = get_key(str(payload.emoji))
+        team1_emoji = logo_table[get_away_team(message)]
+        team2_emoji = logo_table[get_home_team(message)]
         # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
-        created_on_date = reaction.message.created_at.astimezone(pytz.timezone('US/Eastern'))
+        created_on_date = message.created_at.astimezone(pytz.timezone('US/Eastern'))
         if created_on_date.date() != datetime.datetime.now().date():
-            for r in reaction.message.reactions:
-                if str(r) == str(reaction):
+            for r in message.reactions:
+                if str(r) == str(payload.emoji):
                     await r.remove(user)
             return
-
         for game in today_games:
-            if (game["home_team"] == get_home_team(reaction.message)
-                    and game["away_team"] == get_away_team(reaction.message)):
+            if game['message_id'] == payload.message_id:
                 voting_user = get_user(user_db, user.id)
                 if not voting_user:
-                    add_new_user(user_db, game, user, reaction, voted_team)
+                    add_new_user(user_db, game, user, payload.emoji, voted_team)
+                    voting_user = get_user(user_db, user.id)
                 else:
                     update_user_on_vote(user_db, voting_user, game, voted_team)
-                voting_user = get_user(user_db, user.id)
-                update_game_votes(game_db, voting_user, voted_team, reaction.message, True)
+                update_game_votes(game_db, voting_user, voted_team, message, True)
                 break
-
-        if str(reaction) == team1_emoji:
-            for r in reaction.message.reactions:
+        if str(payload.emoji) == team1_emoji:
+            for r in message.reactions:
                 if str(r) == team2_emoji:
                     await r.remove(user)
         else:
-            for r in reaction.message.reactions:
+            for r in message.reactions:
                 if str(r) == team1_emoji:
                     await r.remove(user)
         print(user.name + " voted for " + voted_team)
