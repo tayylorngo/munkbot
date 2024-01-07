@@ -4,7 +4,7 @@ import os
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pymongo import MongoClient
-
+import asyncio
 import settings
 import discord
 from discord.ext import commands
@@ -54,7 +54,7 @@ def run():
         server_stats = get_server_data(server_db)
         if server_stats:
             await ctx.send("CURRENT RECORD: " + str(server_stats["wins"]) + "W-" + str(server_stats["losses"]) + "L-"
-                       + str(server_stats["ties"]) + "T")
+                           + str(server_stats["ties"]) + "T")
         else:
             await ctx.send("No stats available as of now")
 
@@ -70,6 +70,7 @@ def run():
                 away_emoji = logo_table[get_away_team(message)]
                 home_emoji = logo_table[get_home_team(message)]
                 await message.add_reaction(away_emoji)
+                await asyncio.sleep(1)
                 await message.add_reaction(home_emoji)
         await bot.process_commands(message)
 
@@ -101,7 +102,7 @@ def run():
                 if (game["home_team"] == get_home_team(message)
                         and game["away_team"] == get_away_team(message)):
                     game_add_message_id(game_db, game, payload.message_id)
-
+            return
         voted_team = get_key(str(payload.emoji))
         team1_emoji = logo_table[get_away_team(message)]
         team2_emoji = logo_table[get_home_team(message)]
@@ -134,12 +135,13 @@ def run():
 
     async def send_daily_message():
         game_data = get_game_data()
-        channel = bot.get_channel(1181446708232716321)
+        channel = bot.get_channel(1166613333630267412)
         # 1166613333630267412
         await channel.send("NBA Games for: " + datetime.datetime.now().date().__str__())
         for game in game_data:
             add_new_game(game_db, game)
             await channel.send(game)
+            await asyncio.sleep(3)
         await channel.send("@everyone PLEASE VOTE!")
 
     async def update_game_results_message():
@@ -157,8 +159,9 @@ def run():
         if not server_stats:
             init_server_data(server_db)
         server_stats = server_db.games.find_one({"name": "red_army"})
-        channel = bot.get_channel(1181446708232716321)
-        # 1166613333630267412
+        channel = bot.get_channel(1166613333630267412)
+        # 1166613333630267412 RED ARMY
+        # 1181446708232716321 TEST
         yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
             if game['majority_team'] in server_stats['voted_teams']:
@@ -183,6 +186,7 @@ def run():
             else:
                 server_stats['losses'] += 1
                 await message.add_reaction("❌")
+            await asyncio.sleep(3)
 
         curr = 0
         curr2 = max(server_stats['voted_teams'].values(), default=0)
