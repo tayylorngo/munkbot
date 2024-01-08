@@ -34,6 +34,12 @@ def get_user(db, user_id):
     return user
 
 
+def get_user_by_name(db, username):
+    key = {"username": username}
+    user = db.users.find_one(key)
+    return user
+
+
 def update_user_on_vote(db, user, game, voted_team):
     new_games_voted_on_list = user["games_voted_on"]
     new_games_voted_on_list.append(game["_id"])

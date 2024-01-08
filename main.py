@@ -13,7 +13,7 @@ from backend.game_db_functions import get_today_games, add_new_game, game_add_me
     get_yesterday_games, update_game_results
 from backend.server_db_functions import init_server_data, get_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
-    update_user_results
+    update_user_results, get_user_by_name
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
 
@@ -59,8 +59,8 @@ def run():
             await ctx.send("No stats available as of now")
 
     @bot.command()
-    async def stats(ctx, user="server"):
-        if user == "server":
+    async def stats(ctx, username="server"):
+        if username == "server":
             server_stats = get_server_data(server_db)
             if server_stats:
                 await ctx.send("SERVER DATA: ")
@@ -79,7 +79,20 @@ def run():
             else:
                 await ctx.send("No data available as of now")
         else:
-            return
+            user = get_user_by_name(user_db, username)
+            if user:
+                # Display user stats
+                await ctx.send(user['username'] + " DATA:")
+                await ctx.send(str(user['betting_stats']['wins']) + "W-" + str(user['betting_stats']['losses']) + "L")
+                await ctx.send("Win Percentage: " + str(round(user['betting_stats']['win_percent'], 2)) + "%")
+                await ctx.send("Lose Percentage: " + str(round(user['betting_stats']['lose_percent'], 2)) + "%")
+                await ctx.send("Favorite Team: " + user['betting_stats']['favorite_team']
+                               + "(" + user['teams_voted_on'][user['betting_stats']['favorite_team']] + " votes)")
+                await ctx.send("Least Favorite Team: " + user['betting_stats']['least_favorite_team']
+                               + "(" + user['teams_voted_on'][user['betting_stats']['least_favorite_team']] + " votes)")
+                await ctx.send("Average Odds Voted On: " + round(user['betting_stats']['average_betting_odds'], 2))
+            else:
+                await ctx.send("No user data available as of now")
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
