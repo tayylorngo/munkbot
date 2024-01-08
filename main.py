@@ -50,13 +50,36 @@ def run():
         await ctx.send("pong")
 
     @bot.command()
-    async def stats(ctx):
+    async def record(ctx):
         server_stats = get_server_data(server_db)
         if server_stats:
             await ctx.send("CURRENT RECORD: " + str(server_stats["wins"]) + "W-" + str(server_stats["losses"]) + "L-"
                            + str(server_stats["ties"]) + "T")
         else:
             await ctx.send("No stats available as of now")
+
+    @bot.command()
+    async def stats(ctx, user="server"):
+        if user == "server":
+            server_stats = get_server_data(server_db)
+            if server_stats:
+                await ctx.send("SERVER DATA: ")
+                win_percent = round(server_stats["wins"]
+                                    / (server_stats["wins"] + server_stats["losses"] + server_stats["ties"]), 2) * 100
+                lose_percent = round(server_stats["losses"]
+                                     / (server_stats["wins"] + server_stats["losses"] + server_stats["ties"]), 2) * 100
+                tie_percent = 100 - win_percent - lose_percent
+                await ctx.send("Win Percentage: " + str(win_percent) + "%")
+                await ctx.send("Lose Percentage: " + str(lose_percent) + "%")
+                await ctx.send("Tie Percentage: " + str(tie_percent) + "%")
+                await ctx.send("Favorite Team: " + server_stats["favorite_team"]
+                               + "(" + server_stats["voted_teams"][server_stats["favorite_team"]] + " votes)")
+                await ctx.send("Least Favorite Team: " + server_stats["least_favorite_team"]
+                               + "(" + server_stats["voted_teams"][server_stats["least_favorite_team"]] + " votes)")
+            else:
+                await ctx.send("No data available as of now")
+        else:
+            return
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -165,17 +188,19 @@ def run():
         yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
             if game['majority_team'] in server_stats['voted_teams']:
-                server_stats['voted_teams'].update(
-                    {
-                        game['majority_team']: (server_stats['voted_teams'][game['majority_team']]) + 1
-                    }
-                )
+                if game['majority_team'] != "tie":
+                    server_stats['voted_teams'].update(
+                        {
+                            game['majority_team']: (server_stats['voted_teams'][game['majority_team']]) + 1
+                        }
+                    )
             else:
-                server_stats['voted_teams'].update(
-                    {
-                        game['majority_team']: 1
-                    }
-                )
+                if game['majority_team'] != "tie":
+                    server_stats['voted_teams'].update(
+                        {
+                            game['majority_team']: 1
+                        }
+                    )
             message = await channel.fetch_message(game['message_id'])
             if game['winning_team'] == game['majority_team']:
                 server_stats['wins'] += 1
