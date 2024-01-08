@@ -150,7 +150,7 @@ def update_user_results(db, game):
         user = get_user(db, user_id)
         user_betting_stats = user['betting_stats']
         user_betting_stats.update({
-            "wins": user_betting_stats['losses'] + 1,
+            "losses": user_betting_stats['losses'] + 1,
             "win_percent": user_betting_stats['wins'] / (user_betting_stats['wins']
                                                          + user_betting_stats['losses'] + 1),
             "lose_percent": (user_betting_stats['losses'] + 1) / (user_betting_stats['wins']
