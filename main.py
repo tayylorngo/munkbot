@@ -73,24 +73,24 @@ def run():
                 await ctx.send("Lose Percentage: " + str(lose_percent) + "%")
                 await ctx.send("Tie Percentage: " + str(tie_percent) + "%")
                 await ctx.send("Favorite Team: " + server_stats["favorite_team"]
-                               + "(" + server_stats["voted_teams"][server_stats["favorite_team"]] + " votes)")
+                               + " (" + str(server_stats["voted_teams"][server_stats["favorite_team"]]) + " votes)")
                 await ctx.send("Least Favorite Team: " + server_stats["least_favorite_team"]
-                               + "(" + server_stats["voted_teams"][server_stats["least_favorite_team"]] + " votes)")
+                               + " (" + str(server_stats["voted_teams"][server_stats["least_favorite_team"]]) + " votes)")
             else:
                 await ctx.send("No data available as of now")
         else:
             user = get_user_by_name(user_db, username)
             if user:
                 # Display user stats
-                await ctx.send(user['username'] + " DATA:")
+                await ctx.send("Stats for: " + user['username'])
                 await ctx.send(str(user['betting_stats']['wins']) + "W-" + str(user['betting_stats']['losses']) + "L")
-                await ctx.send("Win Percentage: " + str(round(user['betting_stats']['win_percent'], 2)) + "%")
-                await ctx.send("Lose Percentage: " + str(round(user['betting_stats']['lose_percent'], 2)) + "%")
+                await ctx.send("Win Percentage: " + str(round(user['betting_stats']['win_percent'], 2) * 100) + "%")
+                await ctx.send("Lose Percentage: " + str(round(user['betting_stats']['lose_percent'], 2) * 100) + "%")
                 await ctx.send("Favorite Team: " + user['betting_stats']['favorite_team']
-                               + "(" + user['teams_voted_on'][user['betting_stats']['favorite_team']] + " votes)")
+                               + " (" + str(user['teams_voted_on'][user['betting_stats']['favorite_team']]) + " votes)")
                 await ctx.send("Least Favorite Team: " + user['betting_stats']['least_favorite_team']
-                               + "(" + user['teams_voted_on'][user['betting_stats']['least_favorite_team']] + " votes)")
-                await ctx.send("Average Odds Voted On: " + round(user['betting_stats']['average_betting_odds'], 2))
+                               + " (" + str(user['teams_voted_on'][user['betting_stats']['least_favorite_team']]) + " votes)")
+                await ctx.send("Average Betting Odds: " + str(round(user['betting_stats']['average_betting_odds'], 2)))
             else:
                 await ctx.send("No user data available as of now")
 
@@ -142,22 +142,23 @@ def run():
         voted_team = get_key(str(payload.emoji))
         team1_emoji = logo_table[get_away_team(message)]
         team2_emoji = logo_table[get_home_team(message)]
-        now_date = datetime.datetime.utcnow()
-        utc_timezone = pytz.timezone('UTC')
-        est_timezone = pytz.timezone('America/New_York')
-        est_now = utc_timezone.localize(now_date).astimezone(est_timezone)
-        message_created_on = utc_timezone.localize(message.created_at).astimezone(est_timezone)
-        if message_created_on.date() == est_now:
-            for game in today_games:
-                if game['message_id'] == payload.message_id:
+        # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
+        created_on_date = message.created_at.astimezone(pytz.timezone('US/Eastern'))
+        if created_on_date.date() != datetime.datetime.now().date():
+            for r in message.reactions:
+                if str(r) == str(payload.emoji):
+                    await r.remove(user)
+            return
+        for game in today_games:
+            if game['message_id'] == payload.message_id:
+                voting_user = get_user(user_db, user.id)
+                if not voting_user:
+                    add_new_user(user_db, game, user, payload.emoji, voted_team)
                     voting_user = get_user(user_db, user.id)
-                    if not voting_user:
-                        add_new_user(user_db, game, user, payload.emoji, voted_team)
-                        voting_user = get_user(user_db, user.id)
-                    else:
-                        update_user_on_vote(user_db, voting_user, game, voted_team)
-                    update_game_votes(game_db, voting_user, voted_team, message, True)
-                    break
+                else:
+                    update_user_on_vote(user_db, voting_user, game, voted_team)
+                update_game_votes(game_db, voting_user, voted_team, message, True)
+                break
         if str(payload.emoji) == team1_emoji:
             for r in message.reactions:
                 if str(r) == team2_emoji:
