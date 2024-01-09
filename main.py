@@ -142,23 +142,22 @@ def run():
         voted_team = get_key(str(payload.emoji))
         team1_emoji = logo_table[get_away_team(message)]
         team2_emoji = logo_table[get_home_team(message)]
-        # IF REACTION ON DATE OTHER THAN THE CREATED MESSAGE DATE
-        created_on_date = message.created_at.astimezone(pytz.timezone('US/Eastern'))
-        if created_on_date.date() != datetime.datetime.now().date():
-            for r in message.reactions:
-                if str(r) == str(payload.emoji):
-                    await r.remove(user)
-            return
-        for game in today_games:
-            if game['message_id'] == payload.message_id:
-                voting_user = get_user(user_db, user.id)
-                if not voting_user:
-                    add_new_user(user_db, game, user, payload.emoji, voted_team)
+        now_date = datetime.datetime.utcnow()
+        utc_timezone = pytz.timezone('UTC')
+        est_timezone = pytz.timezone('America/New_York')
+        est_now = utc_timezone.localize(now_date).astimezone(est_timezone)
+        message_created_on = utc_timezone.localize(message.created_at).astimezone(est_timezone)
+        if message_created_on.date() == est_now:
+            for game in today_games:
+                if game['message_id'] == payload.message_id:
                     voting_user = get_user(user_db, user.id)
-                else:
-                    update_user_on_vote(user_db, voting_user, game, voted_team)
-                update_game_votes(game_db, voting_user, voted_team, message, True)
-                break
+                    if not voting_user:
+                        add_new_user(user_db, game, user, payload.emoji, voted_team)
+                        voting_user = get_user(user_db, user.id)
+                    else:
+                        update_user_on_vote(user_db, voting_user, game, voted_team)
+                    update_game_votes(game_db, voting_user, voted_team, message, True)
+                    break
         if str(payload.emoji) == team1_emoji:
             for r in message.reactions:
                 if str(r) == team2_emoji:
