@@ -14,6 +14,7 @@ from backend.game_db_functions import get_today_games, add_new_game, game_add_me
 from backend.server_db_functions import init_server_data, get_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
     update_user_results, get_user_by_name
+from embeds import create_user_stats_embed
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
 
@@ -40,10 +41,11 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
-        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
-        scheduler.start()
+        # await send_daily_message()
+        # scheduler = AsyncIOScheduler()
+        # scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
+        # scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
+        # scheduler.start()
 
     @bot.command()
     async def ping(ctx):
@@ -59,7 +61,7 @@ def run():
             await ctx.send("No stats available as of now")
 
     @bot.command()
-    async def stats(ctx, username="server"):
+    async def stats(ctx, *username):
         if username == "server":
             server_stats = get_server_data(server_db)
             if server_stats:
@@ -79,18 +81,24 @@ def run():
             else:
                 await ctx.send("No data available as of now")
         else:
-            user = get_user_by_name(user_db, username)
+            user = get_user_by_name(user_db, " ".join(username))
             if user:
                 # Display user stats
-                await ctx.send("Stats for: " + user['username'])
-                await ctx.send(str(user['betting_stats']['wins']) + "W-" + str(user['betting_stats']['losses']) + "L")
-                await ctx.send("Win Percentage: " + str(round(user['betting_stats']['win_percent'], 2) * 100) + "%")
-                await ctx.send("Lose Percentage: " + str(round(user['betting_stats']['lose_percent'], 2) * 100) + "%")
-                await ctx.send("Favorite Team: " + user['betting_stats']['favorite_team']
-                               + " (" + str(user['teams_voted_on'][user['betting_stats']['favorite_team']]) + " votes)")
-                await ctx.send("Least Favorite Team: " + user['betting_stats']['least_favorite_team']
-                               + " (" + str(user['teams_voted_on'][user['betting_stats']['least_favorite_team']]) + " votes)")
-                await ctx.send("Average Betting Odds: " + str(round(user['betting_stats']['average_betting_odds'], 2)))
+                name = " ".join(username)
+                no_wins = user['betting_stats']['wins']
+                no_losses = user['betting_stats']['losses']
+                win_percent = round((user['betting_stats']['win_percent'] * 100), 2)
+                lose_percent = round((user['betting_stats']['lose_percent'] * 100), 2)
+                favorite_team = user['betting_stats']['favorite_team']
+                favorite_team_count = user['teams_voted_on'][user['betting_stats']['favorite_team']]
+                least_favorite_team = user['betting_stats']['least_favorite_team']
+                least_favorite_team_count = user['teams_voted_on'][user['betting_stats']['least_favorite_team']]
+                avg_odds = round(user['betting_stats']['average_betting_odds'], 2)
+                pfp = user['pfp']
+                embed = create_user_stats_embed(name, no_wins, no_losses, win_percent, lose_percent
+                                                , favorite_team, favorite_team_count, least_favorite_team
+                                                , least_favorite_team_count, avg_odds, pfp)
+                await ctx.send(embed=embed)
             else:
                 await ctx.send("No user data available as of now")
 

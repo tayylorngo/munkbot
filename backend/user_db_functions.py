@@ -11,6 +11,8 @@ def add_new_user(db, game, user, reaction, voted_team):
         {
             "user_id": user.id,
             "username": user.name,
+            "display_name": user.display_name,
+            "display_avatar": user.display_avatar,
             "games_voted_on": games_list,
             "teams_voted_on": {
                 get_key(str(reaction)): 1
@@ -35,7 +37,7 @@ def get_user(db, user_id):
 
 
 def get_user_by_name(db, username):
-    key = {"username": username}
+    key = {"display_name": username}
     user = db.users.find_one(key)
     return user
 
