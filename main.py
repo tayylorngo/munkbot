@@ -14,7 +14,7 @@ from backend.game_db_functions import get_today_games, add_new_game, game_add_me
 from backend.server_db_functions import init_server_data, get_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
     update_user_results, get_user_by_name
-from embeds import create_user_stats_embed, create_server_stats_embed
+from embeds import create_user_stats_embed, create_server_stats_embed, create_leaderboard_embed
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
 
@@ -41,11 +41,10 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
-        # await send_daily_message()
-        # scheduler = AsyncIOScheduler()
-        # scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
-        # scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
-        # scheduler.start()
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
+        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
+        scheduler.start()
 
     @bot.command()
     async def ping(ctx):
@@ -65,8 +64,6 @@ def run():
         if " ".join(username) == "server":
             server_stats = get_server_data(server_db)
             if server_stats:
-
-
                 win_percent = round(server_stats["wins"]
                                     / (server_stats["wins"] + server_stats["losses"] + server_stats["ties"]), 2) * 100
                 lose_percent = round(server_stats["losses"]
@@ -85,7 +82,6 @@ def run():
         else:
             user = get_user_by_name(user_db, " ".join(username))
             if user:
-                # Display user stats
                 embed = create_user_stats_embed(" ".join(username)
                                                 , user['betting_stats']['wins']
                                                 , user['betting_stats']['losses']
@@ -100,6 +96,10 @@ def run():
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("No user data available as of now")
+
+    @bot.command()
+    async def leaderboard(ctx):
+        await ctx.send(embed=create_leaderboard_embed(user_db.users.find({})))
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
