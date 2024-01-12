@@ -34,7 +34,7 @@ def calculate_leaderboard_ranking(user):
 
 def set_leaderboard(user_db, server_db):
     server_db.leaderboard.insert_one({
-        "date": str(datetime.datetime.now().date()),
+        "date": datetime.datetime.now().date().strftime("%m-%d-%Y"),
         "leaderboard": sorted(user_db.users.find({}), key=calculate_leaderboard_ranking, reverse=True)
     })
 
