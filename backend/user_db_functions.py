@@ -1,3 +1,4 @@
+from backend.game_db_functions import get_game_by_id
 from nba_logos import get_key
 
 
@@ -36,6 +37,10 @@ def get_user(db, user_id):
     return user
 
 
+def get_all_users(db):
+    return db.users.find()
+
+
 def get_user_by_name(db, username):
     key = {"display_name": username}
     user = db.users.find_one(key)
@@ -54,17 +59,10 @@ def update_user_on_vote(db, user, game, voted_team):
             voted_team: count
         }
     )
-    curr = 0
-    curr2 = max(new_teams_voted_on.values())
-    favorite_team = ""
-    least_favorite_team = ""
-    for key in new_teams_voted_on.keys():
-        if new_teams_voted_on[key] >= curr:
-            curr = new_teams_voted_on[key]
-            favorite_team = key
-        if new_teams_voted_on[key] <= curr2:
-            curr2 = new_teams_voted_on[key]
-            least_favorite_team = key
+    (least_favorite_team
+     , least_favorite_team_votes
+     , favorite_team
+     , favorite_team_votes) = find_favorite_team(new_teams_voted_on)
     if game["home_team"] == voted_team:
         new_betting_odds = ((user["betting_stats"]["average_betting_odds"] * (len(user["games_voted_on"]) - 1)
                              + game["home_team_odds"]) / (len(user["games_voted_on"])))
@@ -86,18 +84,10 @@ def update_user_on_vote_remove(db, user, game, reaction, voted_team):
             voted_team: count
         }
     )
-    curr = 0
-    curr2 = max(new_teams_voted_on.values(), default=0)
-    favorite_team = ""
-    least_favorite_team = ""
-    for key in new_teams_voted_on.keys():
-        if new_teams_voted_on[key] >= curr:
-            curr = new_teams_voted_on[key]
-            favorite_team = key
-        if new_teams_voted_on[key] <= curr2:
-            curr2 = new_teams_voted_on[key]
-            least_favorite_team = key
-
+    (least_favorite_team
+     , least_favorite_team_votes
+     , favorite_team
+     , favorite_team_votes) = find_favorite_team(new_teams_voted_on)
     if len(user["games_voted_on"]) == 0:
         new_betting_odds = 0
     elif game["home_team"] == voted_team:
@@ -164,3 +154,77 @@ def update_user_results(db, game):
             "lose_percent": (user_betting_stats['losses'] + 1) / (user_betting_stats['wins']
                                                                   + user_betting_stats['losses'] + 1),
         })
+        user_filter = {'user_id': user_id}
+        new_values = {"$set": {
+            "betting_stats": user_betting_stats
+        }}
+        db.users.update_one(user_filter, new_values)
+
+
+def find_favorite_team(teams_voted_on):
+    if not teams_voted_on:
+        return None, None, None, None
+
+    # Find the key-value pairs with the smallest and largest values in the dictionary
+    least_favorite_team, least_favorite_team_votes = min(teams_voted_on.items(), key=lambda x: x[1])
+    favorite_team, favorite_team_votes = max(teams_voted_on.items(), key=lambda x: x[1])
+
+    return least_favorite_team, least_favorite_team_votes, favorite_team, favorite_team_votes
+
+
+def update_user_manual(db, game_db, username):
+    for user in db.users.find({"username": username}):
+        user_games_voted_on = user["games_voted_on"]
+        updated_betting_stats = {
+            "wins": 0,
+            "losses": 0,
+            "average_betting_odds": 0,
+            "win_percent": 0,
+            "lose_percent": 0,
+            "favorite_team": "",
+            "least_favorite_team": "",
+        }
+        updated_teams_voted_on = {}
+        for game_id in user_games_voted_on:
+            game = get_game_by_id(game_db, game_id)
+            selected_team = ""
+            if user["user_id"] in game["away_team_voters"]:
+                selected_team = "away_team"
+            elif user["user_id"] in game["home_team_voters"]:
+                selected_team = "home_team"
+            if game['winning_team'] == "":
+                continue
+            elif game['winning_team'] == game[selected_team]:
+                updated_betting_stats["wins"] += 1
+                updated_betting_stats["win_percent"] = (updated_betting_stats["wins"]
+                                                        / (updated_betting_stats["wins"]
+                                                           + updated_betting_stats["losses"]))
+            else:
+                updated_betting_stats["losses"] += 1
+            updated_betting_stats["lose_percent"] = 1 - updated_betting_stats["win_percent"]
+            if updated_betting_stats["average_betting_odds"] == 0:
+                updated_betting_stats["average_betting_odds"] = game[selected_team + "_odds"]
+            else:
+                updated_betting_stats["average_betting_odds"] = ((updated_betting_stats["average_betting_odds"]
+                                                                  * (updated_betting_stats["wins"]
+                                                                     + updated_betting_stats["losses"] - 1))
+                                                                 + game[selected_team + "_odds"])
+                updated_betting_stats["average_betting_odds"] = (updated_betting_stats["average_betting_odds"]
+                                                                 / (updated_betting_stats["wins"]
+                                                                    + updated_betting_stats["losses"]))
+            if game[selected_team] not in updated_teams_voted_on:
+                updated_teams_voted_on[game[selected_team]] = 1
+            else:
+                updated_teams_voted_on[game[selected_team]] += 1
+            (least_favorite_team
+             , least_favorite_team_votes
+             , favorite_team
+             , favorite_team_votes) = find_favorite_team(updated_teams_voted_on)
+            updated_betting_stats["favorite_team"] = favorite_team
+            updated_betting_stats["least_favorite_team"] = least_favorite_team
+            db.users.update_one({"user_id": user["user_id"]},
+                                {"$set": {
+                                    "teams_voted_on": updated_teams_voted_on,
+                                    "betting_stats": updated_betting_stats
+                                }})
+    print("DONE")

@@ -93,3 +93,8 @@ def get_game(db, message_id):
     key = {"message_id": message_id}
     return db.games.find_one(key)
 
+
+def get_game_by_id(db, _id):
+    key = {"_id": _id}
+    return db.games.find_one(key)
+

@@ -1,3 +1,12 @@
-WARNING    - 2024-01-11 22:12:14,505 - client          : PyNaCl is not installed, voice will NOT be supported
-INFO       - 2024-01-11 22:12:18,907 - client          : logging in using static token
-INFO       - 2024-01-11 22:12:19,499 - gateway         : Shard ID None has connected to Gateway (Session ID: a1655c7c9231ddbf65f9ee8584a0f003).
+WARNING    - 2024-01-12 10:04:26,040 - client          : PyNaCl is not installed, voice will NOT be supported
+INFO       - 2024-01-12 10:04:29,216 - client          : logging in using static token
+INFO       - 2024-01-12 10:04:30,789 - gateway         : Shard ID None has connected to Gateway (Session ID: df3abfc190860d1f8da44c827423f2e4).
+ERROR      - 2024-01-12 10:31:32,069 - client          : Attempting a reconnect in 0.73s
+Traceback (most recent call last):
+  File "/Users/taylorngo/PycharmProjects/munkbot/venv/lib/python3.10/site-packages/discord/client.py", line 659, in connect
+    await self.ws.poll_event()
+  File "/Users/taylorngo/PycharmProjects/munkbot/venv/lib/python3.10/site-packages/discord/gateway.py", line 646, in poll_event
+    raise ConnectionClosed(self.socket, shard_id=self.shard_id, code=code) from None
+discord.errors.ConnectionClosed: Shard ID None WebSocket closed with 1000
+INFO       - 2024-01-12 10:31:33,965 - gateway         : Shard ID None session has been invalidated.
+INFO       - 2024-01-12 10:31:39,969 - gateway         : Shard ID None has connected to Gateway (Session ID: 81333e8a7042aef9ec4beddcb7b6b6ed).

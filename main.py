@@ -10,10 +10,10 @@ import discord
 from discord.ext import commands
 import game_requests
 from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
-    get_yesterday_games, update_game_results
+    get_yesterday_games, update_game_results, get_game_by_id
 from backend.server_db_functions import init_server_data, get_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
-    update_user_results, get_user_by_name
+    update_user_results, get_user_by_name, get_all_users, find_favorite_team
 from embeds import create_user_stats_embed, create_server_stats_embed, create_leaderboard_embed
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
@@ -42,7 +42,7 @@ def run():
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(send_daily_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
+        scheduler.add_job(send_daily_message, 'cron', hour=1, minute=30, timezone="US/Eastern")
         scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
         scheduler.start()
 
