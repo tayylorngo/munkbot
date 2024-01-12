@@ -99,7 +99,7 @@ def run():
                 await ctx.send("No user data available as of now")
 
     @bot.command()
-    async def leaderboard(ctx, date):
+    async def leaderboard(ctx, date=""):
         leaderboard_embed = create_leaderboard_embed(user_db, server_db, date)
         if leaderboard_embed:
             await ctx.send(embed=leaderboard_embed)
