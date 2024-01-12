@@ -11,9 +11,9 @@ from discord.ext import commands
 import game_requests
 from backend.game_db_functions import get_today_games, add_new_game, game_add_message_id, update_game_votes, \
     get_yesterday_games, update_game_results, get_game_by_id, get_game
-from backend.server_db_functions import init_server_data, get_server_data
+from backend.server_db_functions import init_server_data, get_server_data, set_leaderboard
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
-    update_user_results, get_user_by_name, get_all_users, find_favorite_team
+    update_user_results, get_user_by_name, get_all_users, find_favorite_team, update_user_manual
 from embeds import create_user_stats_embed, create_server_stats_embed, create_leaderboard_embed
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
@@ -99,8 +99,12 @@ def run():
                 await ctx.send("No user data available as of now")
 
     @bot.command()
-    async def leaderboard(ctx):
-        await ctx.send(embed=create_leaderboard_embed(user_db.users.find({})))
+    async def leaderboard(ctx, date):
+        leaderboard_embed = create_leaderboard_embed(user_db, server_db, date)
+        if leaderboard_embed:
+            await ctx.send(embed=leaderboard_embed)
+        else:
+            await ctx.send("Leaderboard not available for that date")
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -161,7 +165,6 @@ def run():
         voting_user = get_user(user_db, user.id)
         if not voting_user:
             add_new_user(user_db, game, user, payload.emoji, voted_team)
-            voting_user = get_user(user_db, user.id)
         else:
             update_user_on_vote(user_db, voting_user, game, voted_team)
             update_game_votes(game_db, voting_user, voted_team, message, True)
@@ -256,6 +259,7 @@ def run():
         yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
             update_user_results(user_db, game)
+        set_leaderboard(user_db, server_db)
 
     bot.run(settings.TOKEN, root_logger=True)
 

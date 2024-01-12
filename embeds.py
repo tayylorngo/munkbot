@@ -1,6 +1,6 @@
-import math
-
 import discord
+
+from backend.server_db_functions import set_leaderboard, get_leaderboard_today, get_leaderboard_by_date
 
 
 def create_server_stats_embed(win_percent, lose_percent, tie_percent,
@@ -35,17 +35,18 @@ def create_user_stats_embed(name, wins, losses, win_percent, lose_percent
     return embed
 
 
-def calculate_leaderboard_ranking(user):
-    wins = user['betting_stats']['wins']
-    total_games_played = user['betting_stats']['wins'] + user['betting_stats']['losses']
-    win_percent = wins / total_games_played if total_games_played > 0 else 0
-    weight_factor = math.sqrt(total_games_played)
-    return win_percent * weight_factor
-
-
-def create_leaderboard_embed(users):
-    users = sorted(users, key=calculate_leaderboard_ranking, reverse=True)
-    embed = discord.Embed(title="Server Leaderboard 🏆")
+def create_leaderboard_embed(user_db, server_db, date):
+    if date == "":
+        leaderboard = get_leaderboard_today(server_db)
+    else:
+        leaderboard = get_leaderboard_by_date(server_db, date)
+        if not leaderboard:
+            return None
+    if not leaderboard:
+        set_leaderboard(user_db, server_db)
+        leaderboard = get_leaderboard_today(server_db)
+    users = leaderboard['leaderboard']
+    embed = discord.Embed(title="Server Leaderboard " + leaderboard["date"] + " 🏆")
     for i in enumerate(users):
         num = i[0]
         user = i[1]
