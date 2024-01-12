@@ -158,13 +158,12 @@ def run():
                     await r.remove(user)
             return
         game = get_game(game_db, payload.message_id)
-        if game['message_id'] == payload.message_id:
+        voting_user = get_user(user_db, user.id)
+        if not voting_user:
+            add_new_user(user_db, game, user, payload.emoji, voted_team)
             voting_user = get_user(user_db, user.id)
-            if not voting_user:
-                add_new_user(user_db, game, user, payload.emoji, voted_team)
-                voting_user = get_user(user_db, user.id)
-            else:
-                update_user_on_vote(user_db, voting_user, game, voted_team)
+        else:
+            update_user_on_vote(user_db, voting_user, game, voted_team)
             update_game_votes(game_db, voting_user, voted_team, message, True)
 
         if str(payload.emoji) == team1_emoji:
