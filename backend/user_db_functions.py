@@ -11,6 +11,8 @@ def add_new_user(db, game, user, reaction, voted_team):
         {
             "user_id": user.id,
             "username": user.name,
+            "display_name": user.display_name,
+            "display_avatar": user.display_avatar,
             "games_voted_on": games_list,
             "teams_voted_on": {
                 get_key(str(reaction)): 1
@@ -30,6 +32,12 @@ def add_new_user(db, game, user, reaction, voted_team):
 
 def get_user(db, user_id):
     key = {"user_id": user_id}
+    user = db.users.find_one(key)
+    return user
+
+
+def get_user_by_name(db, username):
+    key = {"display_name": username}
     user = db.users.find_one(key)
     return user
 
@@ -150,7 +158,7 @@ def update_user_results(db, game):
         user = get_user(db, user_id)
         user_betting_stats = user['betting_stats']
         user_betting_stats.update({
-            "wins": user_betting_stats['losses'] + 1,
+            "losses": user_betting_stats['losses'] + 1,
             "win_percent": user_betting_stats['wins'] / (user_betting_stats['wins']
                                                          + user_betting_stats['losses'] + 1),
             "lose_percent": (user_betting_stats['losses'] + 1) / (user_betting_stats['wins']

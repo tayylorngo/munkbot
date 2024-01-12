@@ -13,7 +13,8 @@ from backend.game_db_functions import get_today_games, add_new_game, game_add_me
     get_yesterday_games, update_game_results
 from backend.server_db_functions import init_server_data, get_server_data
 from backend.user_db_functions import get_user, add_new_user, update_user_on_vote, update_user_on_vote_remove, \
-    update_user_results
+    update_user_results, get_user_by_name
+from embeds import create_user_stats_embed, create_server_stats_embed, create_leaderboard_embed
 from nba_logos import logo_table, get_key, get_away_team, get_home_team
 from results_request import get_game_results, filter_results_data
 
@@ -50,13 +51,55 @@ def run():
         await ctx.send("pong")
 
     @bot.command()
-    async def stats(ctx):
+    async def record(ctx):
         server_stats = get_server_data(server_db)
         if server_stats:
             await ctx.send("CURRENT RECORD: " + str(server_stats["wins"]) + "W-" + str(server_stats["losses"]) + "L-"
                            + str(server_stats["ties"]) + "T")
         else:
             await ctx.send("No stats available as of now")
+
+    @bot.command()
+    async def stats(ctx, *username):
+        if " ".join(username) == "server":
+            server_stats = get_server_data(server_db)
+            if server_stats:
+                win_percent = round(server_stats["wins"]
+                                    / (server_stats["wins"] + server_stats["losses"] + server_stats["ties"]), 2) * 100
+                lose_percent = round(server_stats["losses"]
+                                     / (server_stats["wins"] + server_stats["losses"] + server_stats["ties"]), 2) * 100
+                tie_percent = 100 - win_percent - lose_percent
+                embed = create_server_stats_embed(win_percent,
+                                                  lose_percent,
+                                                  tie_percent,
+                                                  server_stats["favorite_team"],
+                                                  server_stats["voted_teams"][server_stats["favorite_team"]],
+                                                  server_stats["least_favorite_team"],
+                                                  server_stats["voted_teams"][server_stats["least_favorite_team"]])
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send("No data available as of now")
+        else:
+            user = get_user_by_name(user_db, " ".join(username))
+            if user:
+                embed = create_user_stats_embed(" ".join(username)
+                                                , user['betting_stats']['wins']
+                                                , user['betting_stats']['losses']
+                                                , round((user['betting_stats']['win_percent'] * 100), 2)
+                                                , round((user['betting_stats']['lose_percent'] * 100), 2)
+                                                , user['betting_stats']['favorite_team']
+                                                , user['teams_voted_on'][user['betting_stats']['favorite_team']]
+                                                , user['betting_stats']['least_favorite_team']
+                                                , user['teams_voted_on'][user['betting_stats']['least_favorite_team']]
+                                                , round(user['betting_stats']['average_betting_odds'], 2)
+                                                , user['pfp'])
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send("No user data available as of now")
+
+    @bot.command()
+    async def leaderboard(ctx):
+        await ctx.send(embed=create_leaderboard_embed(user_db.users.find({})))
 
     def get_game_data():
         return game_requests.filter_data(game_requests.get_data())
@@ -165,17 +208,19 @@ def run():
         yesterday_games = get_yesterday_games(game_db)
         for game in yesterday_games:
             if game['majority_team'] in server_stats['voted_teams']:
-                server_stats['voted_teams'].update(
-                    {
-                        game['majority_team']: (server_stats['voted_teams'][game['majority_team']]) + 1
-                    }
-                )
+                if game['majority_team'] != "tie":
+                    server_stats['voted_teams'].update(
+                        {
+                            game['majority_team']: (server_stats['voted_teams'][game['majority_team']]) + 1
+                        }
+                    )
             else:
-                server_stats['voted_teams'].update(
-                    {
-                        game['majority_team']: 1
-                    }
-                )
+                if game['majority_team'] != "tie":
+                    server_stats['voted_teams'].update(
+                        {
+                            game['majority_team']: 1
+                        }
+                    )
             message = await channel.fetch_message(game['message_id'])
             if game['winning_team'] == game['majority_team']:
                 server_stats['wins'] += 1
