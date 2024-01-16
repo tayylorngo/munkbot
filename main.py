@@ -42,9 +42,9 @@ def run():
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(send_daily_message, 'cron', hour=1, minute=30, timezone="US/Eastern")
-        scheduler.add_job(update_daily_user_data, 'cron', hour=1, minute=45, timezone="US/Eastern")
-        scheduler.add_job(update_game_results_message, 'cron', hour=2, minute=0, timezone="US/Eastern")
+        scheduler.add_job(send_daily_message, 'cron', hour=1, minute=0, timezone="US/Eastern")
+        scheduler.add_job(update_daily_user_data, 'cron', hour=1, minute=5, timezone="US/Eastern")
+        scheduler.add_job(update_game_results_message, 'cron', hour=1, minute=10, timezone="US/Eastern")
         scheduler.start()
 
     @bot.command()
@@ -100,7 +100,7 @@ def run():
 
     @bot.command()
     async def leaderboard(ctx, date=""):
-        leaderboard_embed = create_leaderboard_embed(user_db, server_db, date)
+        leaderboard_embed = create_leaderboard_embed(server_db, date)
         if leaderboard_embed:
             await ctx.send(embed=leaderboard_embed)
         else:

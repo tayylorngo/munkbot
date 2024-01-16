@@ -44,4 +44,4 @@ def get_leaderboard_by_date(server_db, date):
 
 
 def get_leaderboard_today(server_db):
-    return server_db.leaderboard.find_one({"date": str(datetime.datetime.now().date())})
+    return server_db.leaderboard.find_one({"date": datetime.datetime.now().date().strftime("%m-%d-%Y")})
