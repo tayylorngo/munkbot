@@ -61,15 +61,15 @@ def create_leaderboard_embed(server_db, date):
         return None
     users = leaderboard['leaderboard']
     embed = discord.Embed(title="Server Leaderboard " + leaderboard["date"] + " 🏆")
-    today = datetime.now()
-    yesterday = today - timedelta(days=1)
-    yesterday_date_str = yesterday.strftime("%m-%d-%Y")
-    yesterday_leaderboard = get_leaderboard_by_date(server_db, yesterday_date_str)['leaderboard']
+    ranking_diff = {}
     green_triangle_emoji = discord.PartialEmoji(animated=False, id=1195444420988911627, name='green_triangle')
     red_triangle_emoji = discord.PartialEmoji(animated=False, id=1195444771045515438, name='red_triangle')
-    ranking_diff = {}
-    if yesterday_leaderboard:
-        ranking_diff = get_ranking_diff(yesterday_leaderboard, users)
+    if date == "":
+        yesterday = datetime.now() - timedelta(days=1)
+        yesterday_date_str = yesterday.strftime("%m-%d-%Y")
+        yesterday_leaderboard = get_leaderboard_by_date(server_db, yesterday_date_str)['leaderboard']
+        if yesterday_leaderboard:
+            ranking_diff = get_ranking_diff(yesterday_leaderboard, users)
     for i in enumerate(users):
         num = i[0]
         user = i[1]
@@ -88,14 +88,15 @@ def create_leaderboard_embed(server_db, date):
             emoji = " 🗑️"
 
         triangle_emoji = ""
-        if ranking_diff[user["display_name"]] > 0:
-            triangle_emoji = str(green_triangle_emoji) + " "
-        elif ranking_diff[user["display_name"]] < 0:
-            triangle_emoji = str(red_triangle_emoji) + " "
-        if abs(ranking_diff[user["display_name"]]) != 0:
-            rank_change_emoji = number_emojis[abs(ranking_diff[user["display_name"]])]
-        else:
-            rank_change_emoji = ""
+        rank_change_emoji = ""
+        if date == "":
+            if ranking_diff[user["display_name"]] > 0:
+                triangle_emoji = str(green_triangle_emoji) + " "
+            elif ranking_diff[user["display_name"]] < 0:
+                triangle_emoji = str(red_triangle_emoji) + " "
+            if abs(ranking_diff[user["display_name"]]) != 0:
+                rank_change_emoji = number_emojis[abs(ranking_diff[user["display_name"]])]
+
         field_title = (str(num + 1) + ". " + user["display_name"] + emoji
                        + " (" + str(wins) + "W-" + str(losses) + "L) " + triangle_emoji + rank_change_emoji)
         field_value = "Win Rate: " + str(win_percent) + "%"
