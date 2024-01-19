@@ -41,6 +41,8 @@ def run():
     @bot.event
     async def on_ready():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
+        # set_leaderboard(user_db, server_db)
+        # run2()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(send_daily_message, 'cron', hour=1, minute=0, timezone="US/Eastern")
         scheduler.add_job(update_daily_user_data, 'cron', hour=1, minute=5, timezone="US/Eastern")
@@ -260,6 +262,37 @@ def run():
         for game in yesterday_games:
             update_user_results(user_db, game)
         set_leaderboard(user_db, server_db)
+
+    def run2():
+        for user in user_db.users.find({}):
+            voted_games_list = user['games_voted_on']
+            user['betting_stats']['wins'] = 0
+            user['betting_stats']['losses'] = 0
+            for game_id in voted_games_list:
+                game = game_db.games.find_one({"_id": game_id})
+                if game['winning_team'] == "":
+                    continue
+                elif game['winning_team'] == game['home_team']:
+                    if user['user_id'] in game['away_team_voters']:
+                        user['betting_stats']['losses'] += 1
+                    else:
+                        user['betting_stats']['wins'] += 1
+                elif game['winning_team'] == game['away_team']:
+                    if user['user_id'] in game['home_team_voters']:
+                        user['betting_stats']['losses'] += 1
+                    else:
+                        user['betting_stats']['wins'] += 1
+            new_betting_stats = user["betting_stats"]
+            new_betting_stats["win_percent"] = (
+                    new_betting_stats["wins"] / (new_betting_stats["wins"] + new_betting_stats["losses"]))
+            new_betting_stats["lose_percent"] = (
+                    new_betting_stats["losses"] / (new_betting_stats["wins"] + new_betting_stats["losses"]))
+            user_filter = {'user_id': user["user_id"]}
+            new_values = {"$set": {
+                "betting_stats": new_betting_stats
+            }}
+            user_db.users.update_one(user_filter, new_values)
+            print("DONE with " + user["display_name"])
 
     bot.run(settings.TOKEN, root_logger=True)
 
