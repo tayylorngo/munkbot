@@ -76,10 +76,13 @@ def update_game_results(db, game):
     away_team_score = int(game['scores'][1]['score'])
     if home_team_score > away_team_score:
         winning_team = game['scores'][0]['name']
+        losing_team = game['scores'][1]['name']
     else:
         winning_team = game['scores'][1]['name']
+        losing_team = game['scores'][0]['name']
     new_values = {"$set": {
-        "winning_team": winning_team
+        "winning_team": winning_team,
+        "losing_team": losing_team
     }}
     game_filter = {
         "date": datetime.combine(game_date, datetime.min.time()),

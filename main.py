@@ -43,6 +43,7 @@ def run():
         logger.info(f"User: {bot.user} (ID: {bot.user.id})")
         # set_leaderboard(user_db, server_db)
         # run2()
+        # update_losing_teams()
         scheduler = AsyncIOScheduler()
         scheduler.add_job(send_daily_message, 'cron', hour=1, minute=0, timezone="US/Eastern")
         scheduler.add_job(update_daily_user_data, 'cron', hour=1, minute=5, timezone="US/Eastern")
@@ -293,6 +294,20 @@ def run():
             }}
             user_db.users.update_one(user_filter, new_values)
             print("DONE with " + user["display_name"])
+
+    def update_losing_teams():
+        for game in game_db.games.find({}):
+            losing_team = ""
+            if game["winning_team"] == "":
+                continue
+            if game["winning_team"] == game["home_team"]:
+                losing_team = game["away_team"]
+            else:
+                losing_team = game["home_team"]
+            new_values = {"$set": {
+                "losing_team": losing_team
+            }}
+            game_db.games.update_one({'_id': game["_id"]}, new_values)
 
     bot.run(settings.TOKEN, root_logger=True)
 
